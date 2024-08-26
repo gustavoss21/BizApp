@@ -1,27 +1,44 @@
 <?php
 
-$data = [];
+require_once (dirname(__FILE__) . '/inc/config.php');
+require_once (dirname(__FILE__) . '/inc/class_api.php');
 
-$option = $_GET['option'];
+$api = new api_class();
 
-if(isset($option)){
+$result = $api->send_api_status();
 
-    switch($option){
-        case 'valor':
-            $data['status'] = 'sucsses';
-            $data['data'] = 'dados e mais dados';
-            break;
+if (!$api->check_method($_SERVER['REQUEST_METHOD'])){
+    $api->api_request_error('aconteceu um error inesperado');
+};
+// $data = [];
 
-        default:
-            $data['status'] = 'error';
-    }
-}else{
-    $data['status'] = 'error';
-}
+// if($_SERVER['REQUEST_METHOD'] == 'GET'){ 
+//     $data['data'] = ($_GET);
+//     $data['method'] = 'GET';
+// }
 
-response($data);
+// if($_SERVER['REQUEST_METHOD'] == 'POST'){ 
+//     $data['data'] = ($_POST);
+//     $data['method'] = 'POST';
+// }
 
-function response($response_data){
-    header('Content-Type: application/json');
-    echo json_encode($response_data);
-}
+
+// response($data);
+
+
+// function response_success(&$data, $message){
+//     $data['status'] = 'sucsses';
+//     $data['data'] = $message;
+// }
+
+// function check_method($method){
+//     $accept_methods = ['GET', 'POST'];
+//     return in_array($method,$accept_methods,true);
+// }
+
+
+// function response($response_data){
+//     header('Content-Type: application/json');
+//     echo json_encode($response_data);
+// }
+
