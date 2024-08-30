@@ -1,28 +1,18 @@
 <?php
 
-define('URL_BASE','http://localhost/projeto_api/api/?option=');
-
-
-echo '<h1>Aplicação</h1>';
-
-$resposta = request_api('random&main=10&max=20');
-
-echo '<pre>';
-print_r($resposta);
-
-
-function request_api($option){
-
-    // create a new cURL resource
-    $ch = curl_init();
-    
-    // set URL and other appropriate options
-    curl_setopt($ch, CURLOPT_URL, URL_BASE . $option);
-    curl_setopt($ch, CURLOPT_HEADER, 0);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER,1);
-
-    // grab URL and pass it to the browser
-    $resposta = curl_exec($ch);
-    print_r($resposta);
-    return json_decode($resposta);
+$array1 = [1, 2, 3];
+$array = ['a'=>1, 'b' => 2, 'c'=> 3, 'd'=>4];
+$t = '';
+foreach($array as $key=>$a){
+    // if($a == 2){
+    //     continue;
+    // }
+    print_r($a);
+    // next($array);
+    @$t .= $array1[$a];
 }
+// [$t,$el,$a,$d] = $array;
+print_r('---------------');
+print_r($t);
+
+
