@@ -26,4 +26,15 @@ function api_request($endpoint, $method = 'GET', $variables = [])
     // print_r($response);
     return json_decode($response);
     echo $url;
+};
+
+function is_request_error($data){
+    $body = '';
+    $message = [];
+    if(!$data->data){
+        $message['error'] = $data->status;
+        $message['message'] = $data->message;
+        require '../app.php';
+        die();
+    }
 }

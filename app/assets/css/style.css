@@ -1,0 +1,30 @@
+*{
+    padding: none;
+    margin: none;
+}
+
+a{
+    text-decoration: none;
+}
+
+#content-nav{
+    display: flex;
+    gap: 5px;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-around;
+}
+
+#navbar{    
+    background-color: rgb(73, 5, 5);
+    padding: 5px;
+    color: white;
+}
+
+#navbar a{
+    color: white;
+}
+
+#navbar{
+    margin-bottom: 30px;
+}

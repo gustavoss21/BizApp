@@ -1,19 +1,24 @@
-<?php
 
-require_once 'inc/config.php';
-require_once 'inc/api_functions.php';
-$data_client = [
-    'name' => 'gustavo',
-    'telefone' => '123456765432'
-];
-
-$data_product = [
-    'filter' => ['id_cliente' => 22]
-];
-
-// $result = api_request('get_products', 'GET', $data_product);
-$result2 = api_request('get_clients','GET',$data_product);
-
-echo '<pre>';
-// print_r($result);
-print_r($result2);
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><?php echo $title; ?></title>
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <link rel="stylesheet" href="../assets/css/style_cliente.css">
+</head>
+<body>
+    
+    <?php 
+    include 'parciais/header.php';
+    if(isset($message['error'])){
+        echo <<<HTML
+                <p style="color:red; text-align:center">{$message['message']}</p> 
+            HTML;
+    };
+    
+    echo $body; 
+    ?>
+</body>
+</html>

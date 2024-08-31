@@ -1,0 +1,22 @@
+.table{
+    padding: 10px;
+    border: 1px solid rgba(255, 0, 0, 0.097);
+    border-radius: 10px;
+    text-align: left;
+    width: 100%;
+    border-collapse: collapse;
+
+}
+
+.table td{
+    padding: 5px 0 10px 10px;
+}
+
+table tr { 
+    border: 1px solid rgba(255, 0, 0, 0.097);
+    border-width: 1px 0;
+  }
+
+table th { 
+    padding: 10px;
+}
