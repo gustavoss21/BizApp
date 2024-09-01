@@ -25,13 +25,21 @@ function api_request($endpoint, $method = 'GET', $variables = [])
     $response = curl_exec($client);
     // print_r($response);
     return json_decode($response);
-    echo $url;
 };
 
-function is_request_error($data){
+function printDebug($data)
+{
+    echo '<pre>';
+    print_r($data);
+    die();
+}
+
+function is_request_error($data)
+{
     $body = '';
     $message = [];
-    if(!$data->data){
+
+    if (!isset($data->data->data)) {
         $message['error'] = $data->status;
         $message['message'] = $data->message;
         require '../app.php';

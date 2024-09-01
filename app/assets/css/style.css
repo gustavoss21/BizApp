@@ -1,6 +1,6 @@
 *{
-    padding: none;
-    margin: none;
+    padding: 0;
+    margin: 0;
 }
 
 a{
@@ -16,9 +16,9 @@ a{
 }
 
 #navbar{    
-    background-color: rgb(73, 5, 5);
-    padding: 5px;
+    background-color: rgb(148 11 11);
     color: white;
+    padding: 15px 0;
 }
 
 #navbar a{
