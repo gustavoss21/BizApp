@@ -23,15 +23,15 @@ function api_request($endpoint, $method = 'GET', $variables = [])
     curl_setopt($client, CURLOPT_URL, $url);
 
     $response = curl_exec($client);
-    // print_r($response);
+    print_r($response);
     return json_decode($response);
 };
 
-function printDebug($data)
+function printDebug($data,$break=false)
 {
     echo '<pre>';
     print_r($data);
-    die();
+    if($break)die();
 }
 
 function is_request_error($data)

@@ -55,9 +55,9 @@ class database
 
         //connection
         $connection = new PDO(
-            'mysql:host=' . DB_SERVER .
-            ';dbname=' . DB_NAME .
-            ';charset=' . DB_CHARSET,
+            'pgsql:host=' . DB_SERVER .
+            ';port=' . DB_PORT .
+            ';dbname=' . DB_NAME,
             DB_USERNAME,
             DB_PASSWORD,
             [PDO::ATTR_PERSISTENT => true]

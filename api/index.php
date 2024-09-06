@@ -16,10 +16,12 @@ $api_response->set_method($_SERVER['REQUEST_METHOD']);
 
 $api_response->set_endpoint(endpoint);
 // $api_response->teste($_REQUEST, $_GET);
-$logic_data = new api_logic($_GET, endpoint);
+$logic_data = new api_logic($_REQUEST, endpoint);
 if (!$logic_data->check_endpoint()) {
     $api_response->api_request_error('Endpoint is not exist');
 }
+
+$logic_data->setMethod($api_response->get_method());
 
 $get_data_success = $logic_data->{endpoint}();
 
