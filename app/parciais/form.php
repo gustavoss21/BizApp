@@ -10,8 +10,7 @@ $html = <<<HTML
 
 // main body / set form
 
-//set body form
-
+//set input form
 foreach ($data['inputs'] as $input_data) {
     $html .= <<<HTML
         <div class="content-input">
@@ -21,9 +20,10 @@ foreach ($data['inputs'] as $input_data) {
         HTML;
 }
 
+//set button form
 foreach ($data['elements'] as $element) {
     $html .= <<<HTML
-        <{$element['type']} {$element['action']} id="{$element['identifier']}" class="{$element['class']}">{$element['label']}</{$element['type']}>
+        <{$element['tag_type']} {$element['action']} id="{$element['identifier']}" class="{$element['class']}">{$element['label']}</{$element['tag_type']}>
         HTML;
 }
 

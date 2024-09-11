@@ -15,20 +15,26 @@ if (!$api_response->check_method($_SERVER['REQUEST_METHOD'])) {
 $api_response->set_method($_SERVER['REQUEST_METHOD']);
 
 $api_response->set_endpoint(endpoint);
-// $api_response->teste($_REQUEST, $_GET);
 $logic_data = new api_logic($_REQUEST, endpoint);
+
 if (!$logic_data->check_endpoint()) {
     $api_response->api_request_error('Endpoint is not exist');
 }
+
+
 
 $logic_data->setMethod($api_response->get_method());
 
 $get_data_success = $logic_data->{endpoint}();
 
-if ($get_data_success['error']) {
-    $api_response->api_request_error($get_data_success['data']);
+if ($get_data_success['error'] ) {
+   $api_response->api_request_error($get_data_success['message']);
+
 }
 
-$api_response->set_data_endpoint($get_data_success);
+// print_r($get_data_success['data']);
+// $api_response->printDebug();
+// return;
+$api_response->set_data_endpoint($get_data_success['data']);
 
 $api_response->send_api_status();

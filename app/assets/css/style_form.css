@@ -4,6 +4,7 @@
     margin: auto;
     padding: 10px;
     border-radius: 10px;
+    margin-top: 30px;
 }
 
 .content-input{
@@ -35,4 +36,35 @@
 .element-back{
     display: inline-block;
     margin-top: 10px;
+}
+
+/* icon add */
+.content-add-icon{
+    display: inline-block;
+    position: relative;
+    padding: 5px;
+    background-color: yellow;
+    border-radius: 5px;
+    width: 15px;
+    height: 15px;
+}
+
+.add{
+    border: 1.6px solid #877e7e;
+    border-radius: 5px;
+}
+
+.icon-bar-x{
+    position: relative;
+    top: 5px;
+}
+.icon-bar-y{
+    transform: rotate(90deg);
+    position: relative;
+    top: 2px;
+}
+
+#content-notification >  * {
+    margin-top: 30px;
+    text-align: center;
 }

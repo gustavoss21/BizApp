@@ -1,5 +1,6 @@
 <?php
-$v = [];
-$v['nome']['tamanho'] = 'te';
+$filter = [1, 2, 3];
+$t = ['key' => 'value'];
 
-print_r($v);
+print_r(array_merge($t,$filter));
+

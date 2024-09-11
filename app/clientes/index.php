@@ -5,13 +5,16 @@ require_once '../inc/api_functions.php';
 
 $endpoint = 'get_clients';
 
-$data = api_request($endpoint, 'GET');
+$request = api_request($endpoint, 'GET', $_GET);
+// printDebug($request, true);
 
-is_request_error($data);
+$data = is_request_error($request);
 
-$data = $data->data->data;
 $title = 'clientes';
-$subtitle = 'todos os clientes';
+$subtitle = 'clientes';
+$link_base = '/projeto_api/app/clientes';
+$link_create = '/projeto_api/app/clientes/create.php';
+$link_delete = '/projeto_api/app/clientes/confirmation_destroy.php/?id_cliente=';
 $body = require '../parciais/list_objets_html.php';
 
 // print_r($body);

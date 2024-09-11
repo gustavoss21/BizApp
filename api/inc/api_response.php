@@ -17,9 +17,9 @@ class api_response
         ];
     }
 
-    public function printDebug($data){
+    public function printDebug(){
         echo '<pre>';
-        print_r($data);
+        print_r($this->data);
         die();
     }
 
@@ -48,13 +48,14 @@ class api_response
         return $this->data['method'];
     }
 
-    public function api_request_error($message = '',$debug=true)
+    public function api_request_error($message = '',$debug=true,$data=null)
     {
         if (!$debug) {
             $message = 'hove um error inesperado, verifique os dados de requisição!';
         }
         $this->data['status'] = 'ERROR';
         $this->data['message'] = $message;
+        $this->data['data'] = $data;
         $this->send_response();
     }
 

@@ -8,7 +8,14 @@ $param_link = ['nome', 'produto'];
 
 $html = <<<HTML
 
-    <h1 style="text-align: center;color:rgb(148 11 11)">$subtitle</h1>
+    <h1 style="text-align: center;color:rgb(148 11 11)">$subtitle 
+        <a href="{$link_create}">
+            <span class="content-add-icon">
+                <div class="add icon-bar-x"></div>
+                <div class="add icon-bar-y"></div>
+            </span>
+        </a>
+    </h1>
     <div>
         <table class=table>
             <thead>
@@ -43,15 +50,19 @@ foreach ($data as $value) {
         $set_html_value = $value->$key;
         // set url link table
         if (in_array($key, $param_link)) {
-            $url = API_BASE_URL . $endpoint . '/?' . $param_hidden . '=' . $value->$param_hidden;
+            $url = $link_base . '/?filter=' . $param_hidden . ':' . $value->$param_hidden;
             $set_html_value = '<a href="' . $url . '">' . $set_html_value . '</a>';
         }
 
-        $html .= <<<HTML
-            <td>{$set_html_value}</td>
-        HTML;
+        $html .= "<td>{$set_html_value}</td>";
         $cont++;
     }
+
+    $html .= <<<HTML
+        <td>
+            <a href="$link_delete{$value->$param_hidden}">remover</a>
+        </td>
+     HTML;
 
     $cont = 0;
     $html .= '</tr>';
