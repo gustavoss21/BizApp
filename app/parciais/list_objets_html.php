@@ -48,7 +48,7 @@ foreach ($data as $value) {
         }
 
         $set_html_value = $value->$key;
-        // set url link table
+        // set url table link item
         if (in_array($key, $param_link)) {
             $url = $link_base . '/?filter=' . $param_hidden . ':' . $value->$param_hidden;
             $set_html_value = '<a href="' . $url . '">' . $set_html_value . '</a>';
@@ -58,7 +58,11 @@ foreach ($data as $value) {
         $cont++;
     }
 
+    //methods and actions
     $html .= <<<HTML
+        <td>
+            <a href="$link_update{$value->$param_hidden}">atualizar</a>
+        </td>
         <td>
             <a href="$link_delete{$value->$param_hidden}">remover</a>
         </td>

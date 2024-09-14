@@ -32,9 +32,6 @@ if ($get_data_success['error'] ) {
 
 }
 
-// print_r($get_data_success['data']);
-// $api_response->printDebug();
-// return;
 $api_response->set_data_endpoint($get_data_success['data']);
 
 $api_response->send_api_status();

@@ -7,8 +7,8 @@ $submit_uri = $url_base . '/store.php';
 $data = [
     'uri' => $submit_uri,
     'inputs' => [
-        'produto' => ['identifier' => 'produto', 'label' => 'Nome do produto', 'type' => 'text'],
-        'quantidade' => ['identifier' => 'quantidade', 'label' => 'Quantidade em estoque', 'type' => 'number'],
+        'produto' => ['identifier' => 'produto', 'label' => 'Nome do produto', 'type' => 'text', 'value'=>''],
+        'quantidade' => ['identifier' => 'quantidade', 'label' => 'Quantidade em estoque', 'type' => 'number', 'value'=>''],
     ],
     'elements' => [
         'btn-subtmit' => ['identifier' => 'submit-form', 'class' => 'input-submit input-element', 'tag_type' => 'button', 'label' => 'Criar', 'action' => 'type="submit"'],

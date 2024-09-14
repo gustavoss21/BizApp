@@ -23,7 +23,7 @@ function api_request($endpoint, $method = 'GET', $variables = [])
     curl_setopt($client, CURLOPT_URL, $url);
 
     $response = curl_exec($client);
-    // print_r($response);
+    print_r($response);
     return json_decode($response);
 };
 

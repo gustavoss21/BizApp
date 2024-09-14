@@ -14,8 +14,8 @@ $html = <<<HTML
 foreach ($data['inputs'] as $input_data) {
     $html .= <<<HTML
         <div class="content-input">
-            <label for="{$input_data['identifier']}">{$input_data['identifier']}</label>
-            <input class="input-element" type="{$input_data['type']}" name="{$input_data['identifier']}" id="{$input_data['identifier']}" >
+            <label for="{$input_data['identifier']}">{$input_data['label']}</label>
+            <input class="input-element" type="{$input_data['type']}" name="{$input_data['identifier']}" id="{$input_data['identifier']}" value="{$input_data['value']}" >
         </div>
         HTML;
 }

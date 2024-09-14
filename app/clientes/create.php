@@ -2,13 +2,15 @@
 
 require_once '../inc/config.php';
 require_once '../inc/api_functions.php';
+
 $submit_uri = '/projeto_api/app/clientes/store.php';
+
 $data = [
     'uri' => $submit_uri,
     'inputs' => [
-        'nome' => ['identifier' => 'nome', 'label' => 'digite o um nome ou apelido!', 'type' => 'text'],
-        'email' => ['identifier' => 'email', 'label' => 'digite um email válido!', 'type' => 'email'],
-        'telefone' => ['identifier' => 'telefone', 'label' => 'digite um número de telefone!', 'type' => 'text'],
+        'nome' => ['identifier' => 'nome', 'label' => 'digite o um nome ou apelido!', 'type' => 'text', 'value'=>''],
+        'email' => ['identifier' => 'email', 'label' => 'digite um email válido!', 'type' => 'email', 'value'=>''],
+        'telefone' => ['identifier' => 'telefone', 'label' => 'digite um número de telefone!', 'type' => 'text', 'value'=>''],
     ],
     'elements' => [
         'btn-submit' => ['identifier' => 'submit-form', 'class' => 'input-submit input-element', 'tag_type' => 'button', 'label' => 'Criar', 'action' => 'type="submit"'],
