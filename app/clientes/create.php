@@ -8,9 +8,9 @@ $submit_uri = '/projeto_api/app/clientes/store.php';
 $data = [
     'uri' => $submit_uri,
     'inputs' => [
-        'nome' => ['identifier' => 'nome', 'label' => 'digite o um nome ou apelido!', 'type' => 'text', 'value'=>''],
-        'email' => ['identifier' => 'email', 'label' => 'digite um email válido!', 'type' => 'email', 'value'=>''],
-        'telefone' => ['identifier' => 'telefone', 'label' => 'digite um número de telefone!', 'type' => 'text', 'value'=>''],
+        'nome' => ['identifier' => 'nome', 'label' => 'nome', 'type' => 'text', 'value'=>''],
+        'email' => ['identifier' => 'email', 'label' => 'email', 'type' => 'email', 'value'=>''],
+        'telefone' => ['identifier' => 'telefone', 'label' => 'telefone', 'type' => 'text', 'value'=>''],
     ],
     'elements' => [
         'btn-submit' => ['identifier' => 'submit-form', 'class' => 'input-submit input-element', 'tag_type' => 'button', 'label' => 'Criar', 'action' => 'type="submit"'],
@@ -20,5 +20,4 @@ $title = 'cliente';
 $subtitle = 'novo cliente';
 $body = require '../parciais/form.php';
 
-// print_r($body);
 require '../app.php';

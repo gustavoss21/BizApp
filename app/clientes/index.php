@@ -5,8 +5,12 @@ require_once '../inc/api_functions.php';
 
 $endpoint = 'get_clients';
 
-$request = api_request($endpoint, 'GET', $_GET);
-// printDebug($request, true);
+$paramenters = [
+    'filter'=>'active:true',
+    ...$_GET
+];
+
+$request = api_request($endpoint, 'GET', $paramenters);
 
 $data = is_request_error($request);
 
@@ -18,5 +22,4 @@ $link_delete = '/projeto_api/app/clientes/confirmation_destroy.php/?id_cliente='
 $link_update = '/projeto_api/app/clientes/update.php/?id_cliente=';
 $body = require '../parciais/list_objets_html.php';
 
-// print_r($body);
 require '../app.php';

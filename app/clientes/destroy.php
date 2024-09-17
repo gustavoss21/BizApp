@@ -8,16 +8,7 @@ if($_SERVER['REQUEST_METHOD'] !== 'POST'){
 }
 $endpoint = 'destroy_client';
 
-$request = api_request($endpoint, 'POST', $_POST);
+$request = api_request($endpoint, 'POST', $_POST,true);
 printDebug($request);
 
-// $data = (is_request_error($request))[0];
-// // printDebug($data, true);
 
-// $title = 'remover';
-// $subtitle = 'remover cliente';
-// $link_base = '/projeto_api/app/clientes';
-// $body = require '../parciais/confirmation.php';
-
-// // print_r($body);
-// require '../app.php';

@@ -14,7 +14,6 @@ $params = [
 
 $endpoint = 'get_clients';
 $response = api_request($endpoint, 'GET',$params);
-// printDebug($response);
 
 $data_client = is_request_error($response);
 $data_client = $data_client[0];
@@ -29,11 +28,10 @@ $data = [
     ],
     'elements' => [
         'btn-submit' => ['identifier' => 'submit-form', 'class' => 'input-submit input-element', 'tag_type' => 'button', 'label' => 'Atualizar', 'action' => 'type="submit"'],
-        'btn-back' => ['identifier' => 'btn-back', 'tag_type' => 'a', 'class' => 'element-back', 'label' => 'Voltar', 'action' => 'href="../clientes"'],
+        'btn-back' => ['identifier' => 'btn-back', 'tag_type' => 'a', 'class' => 'element-back', 'label' => 'Voltar', 'action' => 'href="../index.php"'],
     ]];
 
 $title = 'cliente';
 $subtitle = 'Atualizar cliente '.$data_client->nome;
 $body = require '../parciais/form.php';
-// print_r($body);
 require '../app.php';

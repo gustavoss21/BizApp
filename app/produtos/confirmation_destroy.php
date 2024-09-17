@@ -9,7 +9,6 @@ $parameters = [
 ];
 
 $request = api_request($endpoint, 'GET', $parameters);
-// printDebug($request,true);
 $data = (is_request_error($request));
 $data = $data[0];
 

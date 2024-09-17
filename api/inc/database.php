@@ -36,7 +36,6 @@ class database
                 $results = $gestor->fetchAll(PDO::FETCH_ASSOC);
             }
         } catch (PDOException $e) {
-            // return ['error' => true, 'data' => null, 'message' => $e];
             return $e;
         }
 
@@ -47,7 +46,6 @@ class database
 
         //returns results
         return $results;
-        // return ['error' => false, 'data' => $results, 'message' => 'ok'];
     }
 
     //==================================================================

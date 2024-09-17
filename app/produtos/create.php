@@ -18,5 +18,4 @@ $title = 'cliente';
 $subtitle = 'novo cliente';
 $body = require '../parciais/form.php';
 
-// print_r($body);
 require '../app.php';

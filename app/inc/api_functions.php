@@ -1,6 +1,6 @@
 <?php
 
-function api_request($endpoint, $method = 'GET', $variables = [])
+function api_request($endpoint, $method = 'GET', $variables = [], $debug=false)
 {
     $client = curl_init();
 
@@ -23,7 +23,10 @@ function api_request($endpoint, $method = 'GET', $variables = [])
     curl_setopt($client, CURLOPT_URL, $url);
 
     $response = curl_exec($client);
-    print_r($response);
+    if($debug){
+        printDebug($response, true);
+    }
+    
     return json_decode($response);
 };
 
@@ -49,5 +52,6 @@ function is_request_error($request)
         require '../app.php';
         die();
     }
+
     return $request->data;
 }
