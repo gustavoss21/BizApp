@@ -3,16 +3,17 @@
 require_once '../inc/config.php';
 require_once '../inc/api_functions.php';
 
+session_start();
+
 $endpoint = 'get_clients';
 
-$paramenters = [
-    'filter'=>'active:true',
-    ...$_GET
-];
-
+$paramenters = ['filter' => implode(';', ['active:true', ...$_GET])];
 $request = api_request($endpoint, 'GET', $paramenters);
 
 $data = is_request_error($request);
+
+$message = isset($_SESSION['message']) ? $_SESSION['message'] : [];
+unset($_SESSION['message']);
 
 $title = 'clientes';
 $subtitle = 'clientes';

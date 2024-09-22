@@ -3,6 +3,8 @@
 require_once '../inc/config.php';
 require_once '../inc/api_functions.php';
 
+session_start();
+
 $endpoint = 'get_products';
 $paramenters = [
     'filter'=>'active:true',
@@ -12,6 +14,10 @@ $paramenters = [
 $data = (api_request($endpoint, 'GET',$paramenters));
 
 $data = is_request_error($data);
+
+$message = isset($_SESSION['message']) ? $_SESSION['message'] : [];
+unset($_SESSION['message']);
+
 $title = 'produto';
 $subtitle = 'todos os produtos';
 $link_base = '/projeto_api/app/produtos';

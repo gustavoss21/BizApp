@@ -13,11 +13,17 @@ $html = <<<HTML
 //set input form
 foreach ($data['inputs'] as $input_data) {
     $html .= <<<HTML
-        <div class="content-input">
-            <label for="{$input_data['identifier']}">{$input_data['label']}</label>
-            <input class="input-element" type="{$input_data['type']}" name="{$input_data['identifier']}" id="{$input_data['identifier']}" value="{$input_data['value']}" >
-        </div>
+            <div class="content-input">
+                <label for="{$input_data['identifier']}">{$input_data['label']}</label>
+                <input class="input-element" type="{$input_data['type']}" name="{$input_data['identifier']}" id="{$input_data['identifier']}" value="{$input_data['value']}" >
+            HTML;
+    // set input error message
+    if ($input_data['text_error']) {
+        $html .= <<<HTML
+            <p style="color:red;">{$input_data['text_error']}</p>
         HTML;
+    }
+    $html .= '</div>';
 }
 
 //set button form

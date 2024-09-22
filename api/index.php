@@ -17,18 +17,17 @@ $api_response->set_method($_SERVER['REQUEST_METHOD']);
 $api_response->set_endpoint(endpoint);
 $logic_data = new api_logic($_REQUEST, endpoint);
 
+
 if (!$logic_data->check_endpoint()) {
     $api_response->api_request_error('Endpoint is not exist');
 }
-
-
 
 $logic_data->setMethod($api_response->get_method());
 
 $get_data_success = $logic_data->{endpoint}();
 
 if ($get_data_success['error'] ) {
-   $api_response->api_request_error($get_data_success['message']);
+   $api_response->api_request_error($get_data_success['message'],$get_data_success['input_error']);
 
 }
 

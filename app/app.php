@@ -11,15 +11,17 @@
 </head>
 <body>
     
-    <?php 
+    <?php
     include 'parciais/header.php';
-    if(isset($message['error'])){
-        echo <<<HTML
-                <p style="color:red; text-align:center">{$message['message']}</p> 
+
+    if ($message) {
+        
+            echo <<<HTML
+                <p style="color:{$message['color']}; text-align:center">{$message['msg']}</p> 
             HTML;
     };
-    
-    echo $body; 
+    echo $body;
     ?>
 </body>
 </html>
+tex

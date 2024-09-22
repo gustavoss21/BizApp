@@ -3,6 +3,8 @@
 require_once '../inc/config.php';
 require_once '../inc/api_functions.php';
 
+session_start();
+
 if(!isset($_GET['id_produto'])){
     header("Location: index.php/");
 }
@@ -19,12 +21,18 @@ $data_product = is_request_error($response);
 $data_product = $data_product[0];
 $submit_uri = '/projeto_api/app/produtos/edit.php';
 
+$input_error = isset($_SESSION['input_error']) ? $_SESSION['input_error'] : [];
+unset($_SESSION['input_error']);
+
+$message = isset($_SESSION['message']) ? $_SESSION['message'] : [];
+unset($_SESSION['message']);
+
 $data = [
     'uri' => $submit_uri,
     'inputs' => [
-        'id_product' => ['identifier' => 'id_produto', 'label' => '', 'type' => 'hidden', 'value'=>$data_product->id_produto],
-        'produto' => ['identifier' => 'produto', 'label' => 'produto', 'type' => 'text', 'value'=>$data_product->produto],
-        'quantidade' => ['identifier' => 'quantidade', 'label' => 'quantidade', 'type' => 'number', 'value'=>$data_product->quantidade],
+        'id_product' => ['identifier' => 'id_produto', 'label' => '', 'type' => 'hidden', 'value'=>$data_product->id_produto, 'text_error' => ''],
+        'produto' => ['identifier' => 'produto', 'label' => 'produto', 'type' => 'text', 'value'=>$data_product->produto, 'text_error' => $input_error->produto ?? ''],
+        'quantidade' => ['identifier' => 'quantidade', 'label' => 'quantidade', 'type' => 'number', 'value'=>$data_product->quantidade, 'text_error' => $input_error->quantidade ?? ''],
     ],
     'elements' => [
         'btn-submit' => ['identifier' => 'submit-form', 'class' => 'input-submit input-element', 'tag_type' => 'button', 'label' => 'Atualizar', 'action' => 'type="submit"'],

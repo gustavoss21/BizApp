@@ -41,16 +41,42 @@ class api_logic
         return $filters_formated;
     }
 
+    protected function isValidParameter($parameter, $parameters)
+    {
+        $methods_validation = [];
+        $methods_validation['min_4'] = fn ($nome) => preg_match('/.{4}/', $nome);
+        $methods_validation['min'] = fn ($numero) => preg_match('/^\d{11}$/', $numero);
+        $methods_validation['int'] = fn ($numero) => preg_match('/^\d+$/', $numero);
+        $methods_validation['email'] = fn ($email) => filter_var($email, FILTER_VALIDATE_EMAIL);
+
+        foreach ($parameters as  $param_value) {
+            $value_for_validation = $parameter;
+            if (!$methods_validation[$param_value]($value_for_validation)) {
+                return false;
+            };
+        }
+        return true;
+    }
+
     protected function isssetParamasValidation($parameters)
     {
         $validation = ['valid' => true, 'erros' => [], 'data' => []];
-        foreach ($parameters as $param) {
-            if (!isset($this->params[$param])) {
+
+        foreach ($parameters as $key => $validatores) {
+            if (!isset($this->params[$key]) or !$this->params[$key]) {
                 $validation['valid'] = false;
-                $validation['erros'][] = 'o parametro ' . $param . ' é requisitado!';
+                $validation['erros'][$key] = 'o parametro ' . $key . ' é requisitado!';
                 continue;
             }
-            $validation['data'][$param] = trim($this->params[$param]);
+            $parameter = trim($this->params[$key]);
+            $is_valid = $this->isValidParameter($parameter, $validatores);
+            if (!$is_valid) {
+                $validation['valid'] = false;
+                $validation['erros'][$key] = 'o parametro ' . $key . ' é invalido!';
+                continue;
+            }
+
+            $validation['data'][$key] = $parameter;
         }
 
         return $validation;
@@ -77,13 +103,13 @@ class api_logic
             }
 
             $query .= $accepted_filters[$key]['param'];
+            $keypast = $key;
 
             if (in_array($key, $are_not_filters_for_consultation)) {
                 continue;
             }
 
             $filters_to_query[':' . $key] = $filter;
-            $keypast = $key;
         }
 
         if (!$query) {
@@ -112,21 +138,23 @@ class api_logic
     protected function exist(string $query_base, array $parameters, $accepted_filters)
     {
         [$query,$parameters] = $this->setQueryFilterSelect($query_base, $parameters, $accepted_filters);
+        // return  [$query,$parameters];
+
         $conection = new database();
         $result = $conection->EXE_QUERY($query, $parameters);
 
         return $result;
     }
 
-    protected function responseError($e)
+    protected function responseError($m, array $input_error = [])
     {
-        $error = ['data' => '', 'message' => $e, 'error' => true];
+        $error = ['data' => '', 'message' => $m, 'input_error' => $input_error, 'error' => true];
         return $error;
     }
 
-    protected function response($data, $message = '')
+    protected function response($data, $message, array $input_error = [])
     {
-        return ['data' => $data, 'message' => $message, 'error' => false];
+        return ['data' => $data, 'message' => $message, 'input_error' => $input_error, 'error' => false];
     }
 
     protected function set_null_deleted_at($db, $identifaier)
@@ -144,7 +172,6 @@ class api_logic
     public function get_products()
     {
         $filters = $this->setFilter();
-        $this->responseError([$filters]);
 
         $accepted_filters = [
             'quantidade' => ['param' => 'quantidade = :quantidade', 'operator' => ''],
@@ -179,7 +206,6 @@ class api_logic
         $conection = new database();
         $query_base = 'select id_produto, produto, quantidade from produtos';
         [$query,$filter_query] = $this->setQueryFilterSelect($query_base, $filters, $accepted_filters);
-        return $this->responseError([$query, $filter_query]);
 
         $produto = $conection->EXE_QUERY($query, $filter_query);
         if ($produto) {
@@ -203,6 +229,7 @@ class api_logic
         ];
 
         $query_base = 'select id_cliente, nome, email, telefone from clientes';
+        // return $this->response([$filters, $accepted_filters], 'client ok');
 
         [$query,$filter_query] = $this->setQueryFilterSelect($query_base, $filters, $accepted_filters);
 
@@ -222,12 +249,12 @@ class api_logic
         }
 
         //inputs required
-        $params = ['produto', 'quantidade', 'id_produto'];
+        $params = ['id_produto' => ['int'], 'produto' => ['min_4'], 'quantidade' => ['int']];
 
         //checks that the parameters are set
         $is_invalid = $this->isssetParamasValidation($params);
         if (!$is_invalid['valid']) {
-            return $this->responseError($is_invalid['erros']);
+            return $this->responseError('existem parâmetros inválidos', $is_invalid['erros']);
         }
 
         //check if exist product registed
@@ -241,8 +268,9 @@ class api_logic
         if (count($is_exist) > 0) {
             if (($is_exist[0]['deleted_at'])) {
                 $this->set_null_deleted_at('produtos', "id_produto = {$is_exist[0]['id_produto']}");
-                return $this->responseError(' produto existe inativo, produto foi ativado!');
+                return $this->responseError(' produto existe inativ, produto foi ativado!');
             }
+
             return $this->responseError('O produto já está cadastrado');
         }
 
@@ -266,12 +294,13 @@ class api_logic
         }
 
         //inputs required
-        $params = ['nome', 'email', 'telefone'];
+        $params = ['nome' => ['min_4'], 'email' => ['email'], 'telefone' => ['min']];
 
         //checks that the parameters are set
         $is_invalid = $this->isssetParamasValidation($params);
+
         if (!$is_invalid['valid']) {
-            return $this->responseError($is_invalid['erros']);
+            return $this->responseError('existem parâmetros inválidos', $is_invalid['erros']);
         }
 
         //check if exist register of inputs
@@ -309,24 +338,25 @@ class api_logic
         }
 
         //inputs required
-        $params = ['id_cliente', 'email', 'telefone'];
+        $params = ['id_cliente' => ['int'], 'email' => ['email'], 'telefone' => ['min']];
 
         //checks that the parameters are set
         $is_invalid = $this->isssetParamasValidation($params);
+
         if (!$is_invalid['valid']) {
-            return $this->responseError($is_invalid['erros']);
+            return $this->responseError('existem parâmetros inválidos', $is_invalid['erros']);
         }
 
         //check if exist client registed
         $is_unique_inputs = [
-            'email' => ['param' => 'email = :email', 'operator' => ''],
-            'nome' => ['param' => 'nome = :nome', 'operator' => ' or '],
+            'email' => ['param' => 'email = :email', 'operator' => ' or '],
             'id_cliente' => ['param' => 'id_cliente <> :id_cliente', 'operator' => ' and ']
         ];
         $check_exists_database = array_intersect_key($is_invalid['data'], $is_unique_inputs);
         $query_base = 'select id_cliente, email, deleted_at from clientes';
 
         $is_exist = $this->exist($query_base, $check_exists_database, $is_unique_inputs);
+        // return $this->responseError($is_exist);
 
         if (count($is_exist) > 0) {
             if (($is_exist[0]['deleted_at'])) {
@@ -339,15 +369,13 @@ class api_logic
         $params_to_query = $this->setQueryParams($is_invalid['data']);
         $query = 'update clientes set email = :email, telefone = :telefone where id_cliente = :id_cliente';
 
-        // return $this->responseError([$query, $params_to_query]);
-
         $connection = new database();
         $result = $connection->EXE_NON_QUERY($query, $params_to_query);
         if (!$result) {
             return $this->responseError('hove um error inesperado');
         }
 
-        return $this->response($result, 'inserction success');
+        return $this->response($result, 'update success');
     }
 
     public function create_products()
@@ -357,12 +385,12 @@ class api_logic
         }
 
         //inputs required
-        $params = ['produto', 'quantidade'];
+        $params = ['produto' => ['min_4'], 'quantidade' => ['int']];
 
         //checks that the parameters are set
         $is_invalid = $this->isssetParamasValidation($params);
         if (!$is_invalid['valid']) {
-            return $this->responseError($is_invalid['erros']);
+            return $this->responseError('existem parâmetros inválidos', $is_invalid['erros']);
         }
 
         //check if exist register of inputs
@@ -399,19 +427,18 @@ class api_logic
         }
 
         //inputs required
-        $params = ['id_cliente'];
-
+        $params = ['id_cliente' => ['int']];
         //checks that the parameters are set
         $is_invalid = $this->isssetParamasValidation($params);
         $is_invalid['data']['active'] = true;
         if (!$is_invalid['valid']) {
-            return $this->responseError($is_invalid['erros']);
+            return $this->responseError('existem parâmetros inválidos', $is_invalid['erros']);
         }
 
         //check if exist register of inputs
         $check_exist_inputs = [
             'id_cliente' => ['param' => 'id_cliente = :id_cliente', 'operator' => ' and '],
-            'clients_active' => ['param' => 'deleted_at is null', 'operator' => ' and '],
+            'active' => ['param' => 'deleted_at is null', 'operator' => ' and '],
         ];
 
         $check_exists_database = array_intersect_key($is_invalid['data'], $check_exist_inputs);
@@ -438,18 +465,18 @@ class api_logic
     public function destroy_product()
     {
         if ($this->method != 'POST') {
-            return $this->responseError('method is not permition');
+            return $this->responseError(['method is not permition']);
         }
 
         //inputs required
-        $params = ['id_produto'];
+        $params = ['id_produto' => ['int']];
 
         //checks that the parameters are set
         $is_invalid = $this->isssetParamasValidation($params);
         $is_invalid['data']['active'] = true;
 
         if (!$is_invalid['valid']) {
-            return $this->responseError($is_invalid['erros']);
+            return $this->responseError('existem parâmetros inválidos', $is_invalid['erros']);
         }
 
         //check if exist register of inputs

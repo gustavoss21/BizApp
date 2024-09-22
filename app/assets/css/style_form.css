@@ -23,7 +23,7 @@
 }
 
 .input-submit{
-    display: inline-block;
+    display: block;
     background-color: rgb(73, 52, 214);
     color: white;
     text-align: center;
