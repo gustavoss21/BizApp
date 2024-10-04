@@ -7,7 +7,7 @@ session_start();
 
 $endpoint = 'get_products';
 $parameters = [
-    'filter'=>"id_produto:{$_GET['id_produto']}"
+    'filter' => "id_produto:{$_GET['id_produto']}"
 ];
 
 $request = api_request($endpoint, 'GET', $parameters);

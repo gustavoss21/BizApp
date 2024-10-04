@@ -2,8 +2,8 @@
 
 function api_request($endpoint, $method = 'GET', $variables = [], $debug = false)
 {
-    $cred = $_SESSION["Authorization"] ?? ''; 
-
+$cred = $_SESSION["Authorization"]; 
+    // return base64_decode($cred);
     $headers = [
         'Authorization: Basic ' . $cred
     ];
@@ -31,6 +31,7 @@ function api_request($endpoint, $method = 'GET', $variables = [], $debug = false
     curl_setopt($client, CURLOPT_URL, $url);
 
     $response = curl_exec($client);
+    // return curl_multi_getcontent($client);
 
     if ($debug) {
         printDebug($response, true);
@@ -75,7 +76,7 @@ function api_request_auth($endpoint, array $user, $method = 'GET', $variables = 
     }
 
     curl_close($client);
-    // printDebug($url, true);
+    // printDebug($response, true);
     // printDebug(['endp'=>$endpoint,'user'=> $user, 'metho'=>$method,'varia'=> $variables],true);
     return json_decode($response);
 };
@@ -99,7 +100,7 @@ function is_request_error($request)
     if (!isset($request->data) || $request->status == 'ERROR') {
         $message['color'] = $request->status;
         $message['msg'] = $request->message;
-        require '../app.php';
+        require 'layout.php';
         die();
     }
 

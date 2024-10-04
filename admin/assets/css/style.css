@@ -62,3 +62,21 @@ a{
 #drop-user:hover{
     display: block;
 }
+
+.filter_search{
+    display: flex;
+    padding: 4px;
+    flex-wrap: nowrap;
+    justify-content: space-evenly;
+    max-width: 500px;
+    background-color: rgba(0, 0, 0, 0.101);
+}
+
+.filter_active{
+    background-color: #ff000012;
+}
+
+.filter_search > * {
+    color: red;
+    padding: 5px 10px;
+}

@@ -7,19 +7,17 @@ session_start();
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     $_SESSION['message'] = ['msg' => ['Metodo não permitido!'], 'color' => 'red', 'type' => 'ERROR'];
+
     header('Location: index.php/');
 }
-
-$endpoint = 'update_product';
+$endpoint = 'destroy_user';
 
 $response = api_request($endpoint, 'POST', $_POST);
+// printDebug($response,true);
+$_SESSION['message'] = ['msg' => 'Cliente removido com sucesso', 'color' => 'green', 'type' => $response->status];
 
 if ($response->status == 'ERROR') {
     $_SESSION['message'] = ['msg' => $response->message, 'color' => 'red', 'type' => $response->status];
-    $_SESSION['input_error'] = $response->input_error;
-    header("Location: update.php/?id_produto={$_POST['id_produto']}");
-    die;
 }
 
-$_SESSION['message'] = ['msg' => 'produto atualizado com sucesso', 'color' => 'green', 'green' => $response->status];
-header('location: index.php');
+header('location: ../index.php');

@@ -9,6 +9,7 @@ class api_logic
 {
     private $filters;
     private $method;
+    private $user = ['name' => '', 'password' => ''];
 
     public function __construct(private $params, private $endpoint)
     {
@@ -91,7 +92,7 @@ class api_logic
         $query = '';
         $filters_to_query = [];
         $keypast = '';
-        $are_not_filters_for_consultation = ['active', 'inactive'];
+        $are_not_filters_for_consultation = ['active', 'inactive', 'is_super_user'];
 
         foreach ($filters as $key => $filter) {
             if (!isset($accepted_filters[$key])) {
@@ -123,7 +124,7 @@ class api_logic
     protected function setQueryParams(array $parameters)
     {
         $parameters_fomated = [];
-        $are_not_params_for_consultation = ['active', 'inactive'];
+        $are_not_params_for_consultation = ['active', 'inactive', 'is_super_user'];
         foreach ($parameters as $key => $filter) {
             if (in_array($key, $are_not_params_for_consultation)) {
                 continue;
@@ -146,9 +147,9 @@ class api_logic
         return $result;
     }
 
-    protected function responseError($m, array $input_error = [])
+    protected function responseError($m, array $input_error = [], $data = [])
     {
-        $error = ['data' => '', 'message' => $m, 'input_error' => $input_error, 'error' => true];
+        $error = ['data' => $data, 'message' => $m, 'input_error' => $input_error, 'error' => true];
         return $error;
     }
 
@@ -164,6 +165,34 @@ class api_logic
         $connection->EXE_NON_QUERY($query);
     }
 
+    public function setUser($username = '', $password = '')
+    {
+        $this->user['name'] = $username;
+        $this->user['password'] = $password;
+    }
+
+    public function authenticate($super_user = false)
+    {
+        $parameters_value = [':nome' => $this->user['name']];
+        $query = 'select id, passwd, nome  from authentication where deleted_at is null and nome = :nome';
+        $query .= $super_user ? ' and is_super_user is not false' : '';
+
+        $conection = new database();
+
+        $user = $conection->EXE_QUERY($query, $parameters_value);
+        if (!$user) {
+            return $this->responseError('Você não tem autorização para fazer essa ação');
+        }
+        // return $this->responseError('product ok',[$this->user,$user]);
+
+        if (!password_verify($this->user['password'], $user[0]['passwd'])) {
+            return $this->responseError('Você não tem autorização para fazer essa ação');
+        }
+
+        unset($user[0]['passwd']);
+        return $this->response($user, 'product ok');
+    }
+
     public function setMethod($method)
     {
         $this->method = $method;
@@ -171,12 +200,17 @@ class api_logic
 
     public function get_products()
     {
+        $response_authenticate = $this->authenticate();
+        if ($response_authenticate['error']) {
+            return $response_authenticate;
+        }
+
         $filters = $this->setFilter();
 
         $accepted_filters = [
-            'quantidade' => ['param' => 'quantidade = :quantidade', 'operator' => ''],
-            'id_produto' => ['param' => 'id_produto = :id_produto', 'operator' => ' end '],
-            'produto' => ['param' => 'produto = :produto', 'operator' => ' end '],
+            'quantidade' => ['param' => 'quantidade = :quantidade', 'operator' => ' and '],
+            'id_produto' => ['param' => 'id_produto = :id_produto', 'operator' => ' and '],
+            'produto' => ['param' => 'produto = :produto', 'operator' => ' and '],
             'deleted_at' => ['param' => 'deleted_at = :deleted_at', 'operator' => ' and '],
             'active' => ['param' => 'deleted_at is null', 'operator' => ' and '],
             'inactive' => ['param' => 'deleted_at is not null', 'operator' => ' and '],
@@ -216,6 +250,13 @@ class api_logic
 
     public function get_clients()
     {
+        //checked if the user is logged in
+        $response_authenticate = $this->authenticate();
+
+        if ($response_authenticate['error']) {
+            return $response_authenticate;
+        }
+
         // by default get only those with null deleted_at
         $filters = $this->setFilter();
 
@@ -242,12 +283,51 @@ class api_logic
         return $this->response($cliente, 'client ok');
     }
 
+    public function get_users()
+    {
+        //checked if the user is logged in
+        $response_authenticate = $this->authenticate(true);
+
+        if ($response_authenticate['error']) {
+            return $response_authenticate;
+        }
+
+        $filters = $this->setFilter();
+
+        $accepted_filters = [
+            'id' => ['param' => 'id = :id', 'operator' => ' and '],
+            'nome' => ['param' => 'nome = :nome', 'operator' => ' and '],
+            'deleted_at' => ['param' => 'deleted_at = :deleted_at', 'operator' => ' and '],
+            'active' => ['param' => 'deleted_at is null', 'operator' => ' and '],
+            'inactive' => ['param' => 'deleted_at is not null', 'operator' => ' and '],
+        ];
+
+        $query_base = 'select id, nome, updated_at, created_at from authentication';
+
+        [$query,$filter_query] = $this->setQueryFilterSelect($query_base, $filters, $accepted_filters);
+        $conection = new database();
+
+        $users = $conection->EXE_QUERY($query, $filter_query);
+        // return $this->responseError('Usuários não encontrado',[$filters]);
+
+        if (!$users) {
+            return $this->responseError('Usuários não encontrado');
+        }
+
+        return $this->response($users, 'Usuários ok');
+    }
+
     public function update_product()
     {
         if ($this->method != 'POST') {
             return $this->responseError('method is not permition');
         }
 
+        $response_authenticate = $this->authenticate();
+
+        if ($response_authenticate['error']) {
+            //return $response_authenticate;
+        }
         //inputs required
         $params = ['id_produto' => ['int'], 'produto' => ['min_4'], 'quantidade' => ['int']];
 
@@ -293,6 +373,11 @@ class api_logic
             return $this->responseError('method is not permition');
         }
 
+        $response_authenticate = $this->authenticate();
+
+        if ($response_authenticate['error']) {
+            //return $response_authenticate;
+        }
         //inputs required
         $params = ['nome' => ['min_4'], 'email' => ['email'], 'telefone' => ['min']];
 
@@ -337,6 +422,11 @@ class api_logic
             return $this->responseError('method is not permition');
         }
 
+        $response_authenticate = $this->authenticate();
+
+        if ($response_authenticate['error']) {
+            //return $response_authenticate;
+        }
         //inputs required
         $params = ['id_cliente' => ['int'], 'email' => ['email'], 'telefone' => ['min']];
 
@@ -383,7 +473,11 @@ class api_logic
         if ($this->method != 'POST') {
             return $this->responseError('method is not permition');
         }
+        $response_authenticate = $this->authenticate();
 
+        if ($response_authenticate['error']) {
+            //return $response_authenticate;
+        }
         //inputs required
         $params = ['produto' => ['min_4'], 'quantidade' => ['int']];
 
@@ -425,7 +519,11 @@ class api_logic
         if ($this->method != 'POST') {
             return $this->responseError('method is not permition');
         }
+        $response_authenticate = $this->authenticate();
 
+        if ($response_authenticate['error']) {
+            //return $response_authenticate;
+        }
         //inputs required
         $params = ['id_cliente' => ['int']];
         //checks that the parameters are set
@@ -462,10 +560,63 @@ class api_logic
         return $this->response($result, 'remove success');
     }
 
+    public function destroy_user()
+    {
+        if ($this->method != 'POST') {
+            return $this->responseError('method is not permition');
+        }
+        $response_authenticate = $this->authenticate();
+
+        if ($response_authenticate['error']) {
+            //return $response_authenticate;
+        }
+        //inputs required
+        $params = ['id' => ['int']];
+        //checks that the parameters are set
+        $is_invalid = $this->isssetParamasValidation($params);
+        $is_invalid['data']['active'] = true;
+        $is_invalid['data']['is_super_user'] = true;
+        if (!$is_invalid['valid']) {
+            return $this->responseError('existem parâmetros inválidos', $is_invalid['erros']);
+        }
+
+        //check if exist register of inputs
+        $check_exist_inputs = [
+            'id' => ['param' => 'id = :id', 'operator' => ' and '],
+            'is_super_user' => ['param' => 'is_super_user is false', 'operator' => ' and '],
+            'active' => ['param' => 'deleted_at is null', 'operator' => ' and '],
+        ];
+
+        $check_exists_database = array_intersect_key($is_invalid['data'], $check_exist_inputs);
+        $query_base = 'select id, deleted_at from authentication';
+        $is_exist = $this->exist($query_base, $check_exists_database, $check_exist_inputs);
+
+        if (count($is_exist) <= 0) {
+            return $this->responseError('Usuário não encontrado ou não pode ser removido, tente mais tarde!');
+        }
+
+        $params_to_query = $this->setQueryParams($is_invalid['data']);
+        $query = 'UPDATE authentication SET deleted_at=now() WHERE id = :id';
+        // return $this->responseError('Usuá', [$query, $params_to_query]);
+
+        $connection = new database();
+        $result = $connection->EXE_NON_QUERY($query, $params_to_query);
+        if (!$result) {
+            return $this->responseError('houve um erro inesperado');
+        }
+
+        return $this->response($result, 'remove success');
+    }
+
     public function destroy_product()
     {
         if ($this->method != 'POST') {
             return $this->responseError(['method is not permition']);
+        }
+
+        $response_authenticate = $this->authenticate();
+        if ($response_authenticate['error']) {
+            //return $response_authenticate;
         }
 
         //inputs required

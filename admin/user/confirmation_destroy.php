@@ -5,29 +5,28 @@ require_once '../inc/api_functions.php';
 
 session_start();
 
-$endpoint = 'get_clients';
+$endpoint = 'get_users';
 
-if (!isset($_GET['id_cliente'])) {
+if (!isset($_GET['id'])) {
     header('Location: index.php/');
 }
 
 $parameters = [
-    'filter' => "id_cliente:{$_GET['id_cliente']}"
+    'filter' => "id:{$_GET['id']}"
 ];
 
-$request = api_request($endpoint, 'GET', $parameters);
+$request = api_request($endpoint,'GET', $parameters);
 $data = (is_request_error($request));
 $data = $data[0];
-
 $message = isset($_SESSION['message']) ? $_SESSION['message'] : [];
 unset($_SESSION['message']);
 
 $title = 'remover';
-$subtitle = 'remover clientes';
-$link_base = '/projeto_api/app/clientes';
-$submit_link = '/projeto_api/app/clientes/destroy.php';
-$parameter_id = 'id_cliente';
+$subtitle = 'remover usuário';
+$link_base = '/projeto_api/admin';
+$submit_link = $link_base . '/user/destroy.php';
+$parameter_id = 'id';
 $item_name = 'nome';
 $body = require '../parciais/confirmation.php';
 
-require '../app.php';
+require '../layout.php';

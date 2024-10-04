@@ -8,17 +8,18 @@ class api_response
     public function __construct()
     {
         $this->data = [
-            'data'=>[],
-            'method'=>null,
-            'endpoint'=>null,
-            'status'=>null,
-            'message'=>null,
-            'input_error'=>[]
+            'data' => [],
+            'method' => null,
+            'endpoint' => null,
+            'status' => null,
+            'message' => null,
+            'input_error' => []
 
         ];
     }
 
-    public function printDebug(){
+    public function printDebug()
+    {
         echo '<pre>';
         print_r($this->data);
         die();
@@ -49,7 +50,7 @@ class api_response
         return $this->data['method'];
     }
 
-    public function api_request_error(string $message = '',array $input_error=[],$debug=true,$data=null)
+    public function api_request_error(string $message = '', array $input_error = [], $debug = true, $data = null)
     {
         if (!$debug) {
             $message = 'hove um error inesperado, verifique os dados de requisição!';
@@ -61,7 +62,8 @@ class api_response
         $this->send_response();
     }
 
-    public function set_data_endpoint($value){
+    public function set_data_endpoint($value)
+    {
         $this->data['data'] = $value;
     }
 

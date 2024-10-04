@@ -10,12 +10,11 @@
             <div>
                 <a href="http://127.0.0.1/projeto_api/app/clientes/">clientes</a>
             </div>
-            <div>
-                <div>
-                    <input id="search" type="search">
-                    <label for="search">perquisar</label>
-                </div>
+            <?php if(isset($_SESSION['user']['username']) and $_SESSION['user']['username']){ ?>
+                <div id="content-user" style="color: rgb(255 255 255);" >
+                <a href="http://127.0.0.1/projeto_api/admin">Admin</a>
             </div>
+            <?php } ?>
         </div>
     </nav>
 </header>

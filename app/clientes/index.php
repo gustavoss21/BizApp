@@ -5,6 +5,7 @@ require_once '../inc/api_functions.php';
 
 session_start();
 
+$message = [];
 $endpoint = 'get_clients';
 
 $paramenters = ['filter' => implode(';', ['active:true', ...$_GET])];
@@ -12,7 +13,10 @@ $request = api_request($endpoint, 'GET', $paramenters);
 
 $data = is_request_error($request);
 
-$message = isset($_SESSION['message']) ? $_SESSION['message'] : [];
+if (isset($_SESSION['message'])) {
+    $message = $_SESSION['message'];
+}
+
 unset($_SESSION['message']);
 
 $title = 'clientes';
