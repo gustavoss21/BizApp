@@ -27,8 +27,8 @@ unset($_SESSION['input_values']);
 $data = [
     'uri' => $submit_uri,
     'inputs' => [
-        'name' => ['identifier' => 'name', 'label' => 'nome', 'type' => 'text', 'value' => $input_values['name'] ?? '', 'text_error' => $input_error->name ?? ''],
-        'password' => ['identifier' => 'password', 'label' => 'senha', 'type' => 'password', 'value' => $input_values['password'] ?? '', 'text_error' => $input_error->password ?? ''],
+        'name' => ['identifier' => 'name', 'label' => 'nome', 'type' => 'text', 'value' => $input_values['name'] ?? '', 'text_error' => $input_error->name ?? '','other_params' => ''],
+        'password' => ['identifier' => 'password', 'label' => 'senha', 'type' => 'password', 'value' => $input_values['password'] ?? '', 'text_error' => $input_error->password ?? '','other_params' => ''],
     ],
     'elements' => [
         'btn-submit' => ['identifier' => 'submit-form', 'class' => 'input-submit input-element', 'tag_type' => 'button', 'label' => 'login', 'action' => 'type="submit"'],

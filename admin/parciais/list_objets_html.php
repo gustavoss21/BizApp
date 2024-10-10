@@ -1,17 +1,19 @@
 <?php
 
 // open tags
-$cont = 0;
-$param_hidden = 'id';
 $param_link = 'nome';
-
-if(!$data){
-    return $body = '<div style="color:red;text-align:center;">nenhum '.$title. ' cadastrado';
-}
-
 $html = <<<HTML
 
-    <h1 style="text-align: center;color:rgb(148 11 11)">$subtitle</h1>
+    <h1 style="text-align: center;color:rgb(148 11 11)">
+        $subtitle
+        <a href="{$link_create}">
+            <span class="content-add-icon">
+                <div class="add icon-bar-x"></div>
+                <div class="add icon-bar-y"></div>
+            </span>
+        </a>
+    </h1>
+    <!-- filter action -->
     <div> 
         <span>filtro:</span>
     <div class="filter_search">
@@ -20,14 +22,17 @@ $html = <<<HTML
         <div {$filterActive['inactive']}><a href="$link_base?filter=inactive:true">inativos</a></div>
     </div>
     <div>
-        <table class=table>
-            <thead>
-                <tr>
     HTML;
-
+if (!$data) {
+    return $html .= '<div style="color:red;text-align:center;">nenhum usuário encontrodo</div>';
+}
+    
 // main body / set data
 
 //set header table
+$html .= ' <table class=table>
+            <thead>
+                <tr>';
 $attribute_object = array_keys((array) $data[0]);
 foreach ($attribute_object as $key) {
     $html .= <<<HTML
@@ -44,24 +49,35 @@ foreach ($data as $value) {
         $set_html_value = $value->$key;
         // set url table link item
         if ($key == $param_link) {
-            $url = $link_base . '/?filter=' . $param_hidden . ':' . $value->$param_hidden;
+            $url = $link_update . $value->id;
             $set_html_value = '<a href="' . $url . '">' . $set_html_value . '</a>';
         }
-
+        //set data
         $html .= "<td>{$set_html_value}</td>";
-        $cont++;
     }
 
-    //methods and actions
-    $html .= <<<HTML
+    //call method deactive item
+    $actions = <<<HTML
         <td>
-            <a href="$link_delete{$value->$param_hidden}">remover</a>
+            <a href="$link_delete{$value->id}">desativar</a>
         </td>
      HTML;
+    //call method active item
+    if ($value->removido) {
+        $actions = <<<HTML
+        <td>
+            <a href="$link_active{$value->id}">Ativar</a>
+        </td>
+     HTML;
+    }
+    $html .= $actions;
 
-    $cont = 0;
+
     $html .= '</tr>';
+
+        
 }
+
 
 // close tags
 $html .= <<<HTML

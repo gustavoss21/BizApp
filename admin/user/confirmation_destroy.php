@@ -5,6 +5,18 @@ require_once '../inc/api_functions.php';
 
 session_start();
 
+$message = '';
+$endpoint = 'authenticate';
+$response = api_request($endpoint, 'GET');
+if ($response->status == 'ERROR') {
+    $_SESSION['message'] = ['msg' => $response->message, 'color' => 'red'];
+    $_SESSION['input_error'] = $response->input_error;
+    $_SESSION['input_values'] = $_POST;
+    header('location: ../../');
+    exit;
+}
+// printDebug($response, true);
+
 $endpoint = 'get_users';
 
 if (!isset($_GET['id'])) {
@@ -15,7 +27,7 @@ $parameters = [
     'filter' => "id:{$_GET['id']}"
 ];
 
-$request = api_request($endpoint,'GET', $parameters);
+$request = api_request($endpoint, 'GET', $parameters);
 $data = (is_request_error($request));
 $data = $data[0];
 $message = isset($_SESSION['message']) ? $_SESSION['message'] : [];

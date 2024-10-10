@@ -2,7 +2,7 @@
 
 function api_request($endpoint, $method = 'GET', $variables = [], $debug = false)
 {
-$cred = $_SESSION["Authorization"]; 
+    $cred = isset($_SESSION["Authorization"])?$_SESSION["Authorization"]:''; 
     // return base64_decode($cred);
     $headers = [
         'Authorization: Basic ' . $cred

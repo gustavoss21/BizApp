@@ -6,10 +6,10 @@ $params_hidden = ['id_cliente', 'id_produto'];
 $param_hidden = '';
 $param_link = ['nome', 'produto'];
 
-if(!$data){
-    return $body = '<div style="color:red;text-align:center;">nenhum '.$title. ' cadastrado';
+if (!$data) {
+    return $body = '<div style="color:red;text-align:center;">nenhum ' . $title . ' cadastrado';
 }
-
+//table head / set icon add
 $html = <<<HTML
 
     <h1 style="text-align: center;color:rgb(148 11 11)">$subtitle 

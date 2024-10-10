@@ -15,7 +15,6 @@ if (!(isset($_SESSION['Authorization']) and $_SESSION['Authorization'])) {
     session_destroy();
     header('Location: auth/login.php');
     exit;
-
 }
 
 $message = [];
@@ -23,7 +22,9 @@ $endpoint = 'get_users';
 // printDebug($_SESSION);
 // session_destroy();
 $paramers = ['filter' => implode(';', $_GET)];
-$request = api_request($endpoint, 'GET',$paramers);
+// printDebug($paramers,true);
+
+$request = api_request($endpoint, 'GET', $paramers);
 // printDebug($request,true);
 $data = is_request_error($request);
 
@@ -34,7 +35,7 @@ if (isset($_SESSION['message'])) {
 unset($_SESSION['message']);
 
 // Utilizando a superglobal $_GET com filtro adequado para evitar injeções de código
-$filterIsActive = filter_input(INPUT_GET, 'filter', FILTER_SANITIZE_SPECIAL_CHARS ) ?? '';
+$filterIsActive = filter_input(INPUT_GET, 'filter', FILTER_SANITIZE_SPECIAL_CHARS) ?? '';
 
 // Definindo a palavra padrão para o filtro ativo
 $activeWordFilter = 'all';
@@ -53,11 +54,13 @@ if (!empty($filterIsActive)) {
 
 // Atualizando a classe CSS do filtro ativo
 $filterActive[$activeWordFilter] = 'class="filter_active"';
-// printDebug($filterActive);
 $title = 'Usuários';
 $subtitle = 'Usuários da API';
 $link_base = '/projeto_api/admin/';
 $link_delete = $link_base . 'user/confirmation_destroy.php/?id=';
-$body = require 'parciais/list_objets_html.php';
+$link_active = $link_base . 'user/active.php/?id=';
+$link_update = $link_base . 'user/update.php/?id=';
+$link_create = $link_base . 'user/create.php';
 
+$body = require 'parciais/list_objets_html.php';
 require 'layout.php';

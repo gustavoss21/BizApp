@@ -46,6 +46,7 @@ class api_logic
     {
         $methods_validation = [];
         $methods_validation['min_4'] = fn ($nome) => preg_match('/.{4}/', $nome);
+        $methods_validation['min_32'] = fn ($nome) => preg_match('/.{32}/', $nome);
         $methods_validation['min'] = fn ($numero) => preg_match('/^\d{11}$/', $numero);
         $methods_validation['int'] = fn ($numero) => preg_match('/^\d+$/', $numero);
         $methods_validation['email'] = fn ($email) => filter_var($email, FILTER_VALIDATE_EMAIL);
@@ -216,7 +217,7 @@ class api_logic
             'inactive' => ['param' => 'deleted_at is not null', 'operator' => ' and '],
         ];
 
-        $query_base = 'select id_produto, produto, quantidade, deleted_at from produtos';
+        $query_base = 'select id_produto, produto, quantidade, deleted_at as removido from produtos';
 
         [$query,$filter_query] = $this->setQueryFilterSelect($query_base, $filters, $accepted_filters);
 
@@ -302,19 +303,126 @@ class api_logic
             'inactive' => ['param' => 'deleted_at is not null', 'operator' => ' and '],
         ];
 
-        $query_base = 'select id, nome, updated_at, created_at from authentication';
+        $query_base = 'select id, nome,tokken, created_at as criado, deleted_at as removido from authentication';
 
         [$query,$filter_query] = $this->setQueryFilterSelect($query_base, $filters, $accepted_filters);
+        // return $this->responseError('Usuários não encontrado',[$query,$this->params]);
+        
         $conection = new database();
 
         $users = $conection->EXE_QUERY($query, $filter_query);
         // return $this->responseError('Usuários não encontrado',[$filters]);
 
-        if (!$users) {
-            return $this->responseError('Usuários não encontrado');
+        return $this->response($users, 'Usuários ok');
+    }
+
+    public function create_user()
+    {
+        if ($this->method != 'POST') {
+            return $this->responseError('method is not permition');
         }
 
-        return $this->response($users, 'Usuários ok');
+        $response_authenticate = $this->authenticate(true);
+
+        if ($response_authenticate['error']) {
+            return $response_authenticate;
+        }
+        
+        //inputs required and validators
+        $params = ['nome' => ['min_4'], 'tokken' => ['min_32'], 'password' => ['min_32']];
+
+        //checks that the parameters are set
+        $params_data = $this->isssetParamasValidation($params);
+
+        if (!$params_data['valid']) {
+            return $this->responseError('existem parâmetros inválidos', $params_data['erros']);
+        }
+
+        //check if exist register of inputs
+        $is_unique_inputs = [
+            'nome' => ['param' => 'nome = :nome', 'operator' => ' or '],
+            'tokken' => ['param' => 'tokken = :tokken', 'operator' => ' and '],
+            'active' => ['param' => 'deleted_at is null', 'operator' => ' and '],
+        ];
+
+        $check_exists_database = array_intersect_key($params_data['data'], $is_unique_inputs);
+        $query_base = 'select id, nome, deleted_at from authentication';
+
+        $is_exist = $this->exist($query_base, $check_exists_database, $is_unique_inputs);
+
+        if (count($is_exist) > 0) {
+            return $this->responseError('o nome ou username já está cadastrado');
+        }
+
+        $params_to_query = $this->setQueryParams($params_data['data']);
+        $query = 'insert into authentication (nome, tokken, passwd, created_at, updated_at) values(:nome, :tokken, :password, now(), now())';
+
+        $connection = new database();
+        $result = $connection->EXE_NON_QUERY($query, $params_to_query);
+
+        if (!$result) {
+            return $this->responseError('hove um error inesperado');
+        }
+
+        return $this->response($result, 'inserction success');
+    }
+
+    public function updateUser()
+    {
+        if ($this->method != 'POST') {
+            return $this->responseError('method is not permition');
+        }
+
+        $response_authenticate = $this->authenticate();
+
+        if ($response_authenticate['error']) {
+            return $response_authenticate;
+        }
+        //inputs required
+        $params = ['id'=>['int'],'nome' => ['min_4']];
+        $is_unique_inputs = [
+            'nome' => ['param' => 'nome = :nome', 'operator' => ' or '],
+            'id' => ['param' => 'id <> :id', 'operator' => ' and ']
+        ];
+        $query = 'update authentication set nome = :nome where id = :id';
+
+        if(isset($this->params['tokken'])){
+            //inputs required
+            $params = ['id'=>['int'],'nome' => ['min_4'], 'tokken' => ['min_32'], 'password' => ['min_32']];
+            $query = 'update authentication set nome = :nome, tokken = :tokken, passwd = :password where id = :id';
+
+
+        }
+
+        //checks that the parameters are set
+        $params_data = $this->isssetParamasValidation($params);
+        // return $this->responseError($params_data);
+
+        if (!$params_data['valid']) {
+            return $this->responseError('existem parâmetros inválidos', $params_data['erros']);
+        }
+
+        //check if exist client registed
+
+        $check_exists_database = array_intersect_key($params_data['data'], $is_unique_inputs);
+        $query_base = 'select id, nome, deleted_at from authentication';
+
+        $is_exist = $this->exist($query_base, $check_exists_database, $is_unique_inputs);
+
+        if (count($is_exist) > 0) {
+            return $this->responseError('email ou nome já está cadastrado');
+        }
+
+        $params_to_query = $this->setQueryParams($params_data['data']);
+        // return $this->response([$params_to_query,$query], 'update success');
+
+        $connection = new database();
+        $result = $connection->EXE_NON_QUERY($query, $params_to_query);
+        if (!$result) {
+            return $this->responseError('hove um error inesperado');
+        }
+
+        return $this->response($result, 'update success');
     }
 
     public function update_product()
@@ -332,16 +440,16 @@ class api_logic
         $params = ['id_produto' => ['int'], 'produto' => ['min_4'], 'quantidade' => ['int']];
 
         //checks that the parameters are set
-        $is_invalid = $this->isssetParamasValidation($params);
-        if (!$is_invalid['valid']) {
-            return $this->responseError('existem parâmetros inválidos', $is_invalid['erros']);
+        $params_data = $this->isssetParamasValidation($params);
+        if (!$params_data['valid']) {
+            return $this->responseError('existem parâmetros inválidos', $params_data['erros']);
         }
 
         //check if exist product registed
         $is_unique_inputs = [
             'produto' => ['param' => 'produto = :produto', 'operator' => ' and '],
             'id_produto' => ['param' => 'id_produto <> :id_produto', 'operator' => ' and ']];
-        $check_exists_database = array_intersect_key($is_invalid['data'], $is_unique_inputs);
+        $check_exists_database = array_intersect_key($params_data['data'], $is_unique_inputs);
         $query_base = 'select id_produto, deleted_at from produtos';
         $is_exist = $this->exist($query_base, $check_exists_database, $is_unique_inputs);
 
@@ -355,7 +463,7 @@ class api_logic
         }
 
         // performs the insertion
-        $params_to_query = $this->setQueryParams($is_invalid['data']);
+        $params_to_query = $this->setQueryParams($params_data['data']);
         $query = 'update produtos set produto = :produto, quantidade = :quantidade where id_produto = :id_produto';
 
         $connection = new database();
@@ -382,17 +490,17 @@ class api_logic
         $params = ['nome' => ['min_4'], 'email' => ['email'], 'telefone' => ['min']];
 
         //checks that the parameters are set
-        $is_invalid = $this->isssetParamasValidation($params);
+        $params_data = $this->isssetParamasValidation($params);
 
-        if (!$is_invalid['valid']) {
-            return $this->responseError('existem parâmetros inválidos', $is_invalid['erros']);
+        if (!$params_data['valid']) {
+            return $this->responseError('existem parâmetros inválidos', $params_data['erros']);
         }
 
         //check if exist register of inputs
         $is_unique_inputs = ['email' => ['param' => 'email = :email', 'operator' => ''], 'nome' => ['param' => 'nome = :nome', 'operator' => ' or ']];
         $query = 'insert into clientes (nome, email, telefone) values(:nome, :email, :telefone)';
 
-        $check_exists_database = array_intersect_key($is_invalid['data'], $is_unique_inputs);
+        $check_exists_database = array_intersect_key($params_data['data'], $is_unique_inputs);
         $query_base = 'select id_cliente, email, deleted_at from clientes';
 
         $is_exist = $this->exist($query_base, $check_exists_database, $is_unique_inputs);
@@ -405,7 +513,7 @@ class api_logic
             return $this->responseError('email ou nome já está cadastrado');
         }
 
-        $params_to_query = $this->setQueryParams($is_invalid['data']);
+        $params_to_query = $this->setQueryParams($params_data['data']);
 
         $connection = new database();
         $result = $connection->EXE_NON_QUERY($query, $params_to_query);
@@ -431,10 +539,10 @@ class api_logic
         $params = ['id_cliente' => ['int'], 'email' => ['email'], 'telefone' => ['min']];
 
         //checks that the parameters are set
-        $is_invalid = $this->isssetParamasValidation($params);
+        $params_data = $this->isssetParamasValidation($params);
 
-        if (!$is_invalid['valid']) {
-            return $this->responseError('existem parâmetros inválidos', $is_invalid['erros']);
+        if (!$params_data['valid']) {
+            return $this->responseError('existem parâmetros inválidos', $params_data['erros']);
         }
 
         //check if exist client registed
@@ -442,7 +550,7 @@ class api_logic
             'email' => ['param' => 'email = :email', 'operator' => ' or '],
             'id_cliente' => ['param' => 'id_cliente <> :id_cliente', 'operator' => ' and ']
         ];
-        $check_exists_database = array_intersect_key($is_invalid['data'], $is_unique_inputs);
+        $check_exists_database = array_intersect_key($params_data['data'], $is_unique_inputs);
         $query_base = 'select id_cliente, email, deleted_at from clientes';
 
         $is_exist = $this->exist($query_base, $check_exists_database, $is_unique_inputs);
@@ -456,7 +564,7 @@ class api_logic
             return $this->responseError('email ou nome já está cadastrado');
         }
 
-        $params_to_query = $this->setQueryParams($is_invalid['data']);
+        $params_to_query = $this->setQueryParams($params_data['data']);
         $query = 'update clientes set email = :email, telefone = :telefone where id_cliente = :id_cliente';
 
         $connection = new database();
@@ -482,14 +590,14 @@ class api_logic
         $params = ['produto' => ['min_4'], 'quantidade' => ['int']];
 
         //checks that the parameters are set
-        $is_invalid = $this->isssetParamasValidation($params);
-        if (!$is_invalid['valid']) {
-            return $this->responseError('existem parâmetros inválidos', $is_invalid['erros']);
+        $params_data = $this->isssetParamasValidation($params);
+        if (!$params_data['valid']) {
+            return $this->responseError('existem parâmetros inválidos', $params_data['erros']);
         }
 
         //check if exist register of inputs
         $is_unique_inputs = ['produto' => ['param' => 'produto = :produto', 'operator' => '']];
-        $check_exists_database = array_intersect_key($is_invalid['data'], $is_unique_inputs);
+        $check_exists_database = array_intersect_key($params_data['data'], $is_unique_inputs);
         $query_base = 'select id_produto, deleted_at from produtos';
         $is_exist = $this->exist($query_base, $check_exists_database, $is_unique_inputs);
 
@@ -502,7 +610,7 @@ class api_logic
         }
 
         // performs the insertion
-        $params_to_query = $this->setQueryParams($is_invalid['data']);
+        $params_to_query = $this->setQueryParams($params_data['data']);
         $query = 'insert into produtos (produto, quantidade) values(:produto, :quantidade)';
 
         $connection = new database();
@@ -527,10 +635,10 @@ class api_logic
         //inputs required
         $params = ['id_cliente' => ['int']];
         //checks that the parameters are set
-        $is_invalid = $this->isssetParamasValidation($params);
-        $is_invalid['data']['active'] = true;
-        if (!$is_invalid['valid']) {
-            return $this->responseError('existem parâmetros inválidos', $is_invalid['erros']);
+        $params_data = $this->isssetParamasValidation($params);
+        $params_data['data']['active'] = true;
+        if (!$params_data['valid']) {
+            return $this->responseError('existem parâmetros inválidos', $params_data['erros']);
         }
 
         //check if exist register of inputs
@@ -539,7 +647,7 @@ class api_logic
             'active' => ['param' => 'deleted_at is null', 'operator' => ' and '],
         ];
 
-        $check_exists_database = array_intersect_key($is_invalid['data'], $check_exist_inputs);
+        $check_exists_database = array_intersect_key($params_data['data'], $check_exist_inputs);
         $query_base = 'select id_cliente, deleted_at from clientes';
 
         $is_exist = $this->exist($query_base, $check_exists_database, $check_exist_inputs);
@@ -548,7 +656,7 @@ class api_logic
             return $this->responseError('cliente não encontrado, tente mais tarde!');
         }
 
-        $params_to_query = $this->setQueryParams($is_invalid['data']);
+        $params_to_query = $this->setQueryParams($params_data['data']);
         $query = 'UPDATE clientes SET deleted_at=now() WHERE id_cliente = :id_cliente';
 
         $connection = new database();
@@ -573,11 +681,11 @@ class api_logic
         //inputs required
         $params = ['id' => ['int']];
         //checks that the parameters are set
-        $is_invalid = $this->isssetParamasValidation($params);
-        $is_invalid['data']['active'] = true;
-        $is_invalid['data']['is_super_user'] = true;
-        if (!$is_invalid['valid']) {
-            return $this->responseError('existem parâmetros inválidos', $is_invalid['erros']);
+        $params_data = $this->isssetParamasValidation($params);
+        $params_data['data']['active'] = true;
+        $params_data['data']['is_super_user'] = true;
+        if (!$params_data['valid']) {
+            return $this->responseError('existem parâmetros inválidos', $params_data['erros']);
         }
 
         //check if exist register of inputs
@@ -587,7 +695,7 @@ class api_logic
             'active' => ['param' => 'deleted_at is null', 'operator' => ' and '],
         ];
 
-        $check_exists_database = array_intersect_key($is_invalid['data'], $check_exist_inputs);
+        $check_exists_database = array_intersect_key($params_data['data'], $check_exist_inputs);
         $query_base = 'select id, deleted_at from authentication';
         $is_exist = $this->exist($query_base, $check_exists_database, $check_exist_inputs);
 
@@ -595,8 +703,56 @@ class api_logic
             return $this->responseError('Usuário não encontrado ou não pode ser removido, tente mais tarde!');
         }
 
-        $params_to_query = $this->setQueryParams($is_invalid['data']);
+        $params_to_query = $this->setQueryParams($params_data['data']);
         $query = 'UPDATE authentication SET deleted_at=now() WHERE id = :id';
+        // return $this->responseError('Usuá', [$query, $params_to_query]);
+
+        $connection = new database();
+        $result = $connection->EXE_NON_QUERY($query, $params_to_query);
+        if (!$result) {
+            return $this->responseError('houve um erro inesperado');
+        }
+
+        return $this->response($result, 'remove success');
+    }
+
+    public function activeUser()
+    {
+        if ($this->method != 'POST') {
+            return $this->responseError('method is not permition');
+        }
+        $response_authenticate = $this->authenticate();
+
+        if ($response_authenticate['error']) {
+            return $response_authenticate;
+        }
+        //inputs required
+        $params = ['id' => ['int']];
+        //checks that the parameters are set
+        $params_data = $this->isssetParamasValidation($params);
+        $params_data['data']['inactive'] = true;
+        $params_data['data']['is_super_user'] = true;
+        if (!$params_data['valid']) {
+            return $this->responseError('existem parâmetros inválidos', $params_data['erros']);
+        }
+
+        //check if exist register of inputs
+        $check_exist_inputs = [
+            'id' => ['param' => 'id = :id', 'operator' => ' and '],
+            'is_super_user' => ['param' => 'is_super_user is false', 'operator' => ' and '],
+            'active' => ['param' => 'deleted_at is null', 'operator' => ' and '],
+        ];
+
+        $check_exists_database = array_intersect_key($params_data['data'], $check_exist_inputs);
+        $query_base = 'select id, deleted_at from authentication';
+        $is_exist = $this->exist($query_base, $check_exists_database, $check_exist_inputs);
+
+        if (count($is_exist) <= 0) {
+            return $this->responseError('Usuário não encontrado ou não pode ser removido, tente mais tarde!');
+        }
+
+        $params_to_query = $this->setQueryParams($params_data['data']);
+        $query = 'UPDATE authentication SET deleted_at=null WHERE id = :id';
         // return $this->responseError('Usuá', [$query, $params_to_query]);
 
         $connection = new database();
@@ -623,11 +779,11 @@ class api_logic
         $params = ['id_produto' => ['int']];
 
         //checks that the parameters are set
-        $is_invalid = $this->isssetParamasValidation($params);
-        $is_invalid['data']['active'] = true;
+        $params_data = $this->isssetParamasValidation($params);
+        $params_data['data']['active'] = true;
 
-        if (!$is_invalid['valid']) {
-            return $this->responseError('existem parâmetros inválidos', $is_invalid['erros']);
+        if (!$params_data['valid']) {
+            return $this->responseError('existem parâmetros inválidos', $params_data['erros']);
         }
 
         //check if exist register of inputs
@@ -636,7 +792,7 @@ class api_logic
             'active' => ['param' => 'deleted_at is null', 'operator' => ' and ']
         ];
 
-        $check_exists_database = array_intersect_key($is_invalid['data'], $check_exist_inputs);
+        $check_exists_database = array_intersect_key($params_data['data'], $check_exist_inputs);
         $query_base = 'select id_produto, deleted_at from produtos';
         $is_exist = $this->exist($query_base, $check_exists_database, $check_exist_inputs);
 
@@ -644,7 +800,7 @@ class api_logic
             return $this->responseError('produto não encontrado, tente mais tarde!');
         }
 
-        $params_to_query = $this->setQueryParams($is_invalid['data']);
+        $params_to_query = $this->setQueryParams($params_data['data']);
         $query = 'UPDATE produtos SET deleted_at=now() WHERE id_produto = :id_produto';
 
         $connection = new database();
