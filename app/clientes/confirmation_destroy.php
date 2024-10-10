@@ -15,7 +15,8 @@ $parameters = [
     'filter' => "id_cliente:{$_GET['id_cliente']}"
 ];
 
-$request = api_request($endpoint, 'GET', $parameters);
+$request = api_request_auth($endpoint, $user, 'GET', $parameters);
+
 $data = (is_request_error($request));
 $data = $data[0];
 

@@ -1,14 +1,14 @@
 <?php
 
-function api_request($endpoint, $method = 'GET', $variables = [], $debug = false)
+function api_request($endpoint, $method = 'GET', $user, $variables = [], $debug = false)
 {
-    $cred = $_SESSION["Authorization"] ?? ''; 
+    $cred = base64_decode("{$user['tokken']}:{$user['password']}");
 
     $headers = [
         'Authorization: Basic ' . $cred
     ];
-    // return base64_decode($cred);
-    
+    // return $cred;
+
     $client = curl_init();
     curl_setopt($client, CURLOPT_HTTPHEADER, $headers);
 
@@ -43,7 +43,7 @@ function api_request_auth($endpoint, array $user, $method = 'GET', $variables = 
 {
     // return [$endpoint, $method, $variables, $user, $debug ];
 
-    $credenciaisBase64 = base64_encode("{$user['name']}:{$user['password']}");
+    $credenciaisBase64 = base64_encode("{$user['username']}:{$user['password']}");
     $url = API_BASE_URL;
 
     $headers = [
@@ -75,7 +75,6 @@ function api_request_auth($endpoint, array $user, $method = 'GET', $variables = 
     }
 
     curl_close($client);
-    // printDebug($url, true);
     // printDebug(['endp'=>$endpoint,'user'=> $user, 'metho'=>$method,'varia'=> $variables],true);
     return json_decode($response);
 };

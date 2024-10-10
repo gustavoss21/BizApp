@@ -11,7 +11,7 @@ $paramenters = [
     ...$_GET
 ];
 
-$data = api_request($endpoint, 'GET', $paramenters);
+$data = api_request_auth($endpoint, $user, 'GET', $paramenters);
 // printDebug($data,true);
 $data = is_request_error($data);
 

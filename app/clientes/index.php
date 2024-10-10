@@ -9,7 +9,9 @@ $message = [];
 $endpoint = 'get_clients';
 
 $paramenters = ['filter' => implode(';', ['active:true', ...$_GET])];
-$request = api_request($endpoint, 'GET', $paramenters);
+// printDebug($user, true);
+$request = api_request_auth($endpoint,$user ,'GET', $paramenters);
+// printDebug($request, true);
 
 $data = is_request_error($request);
 

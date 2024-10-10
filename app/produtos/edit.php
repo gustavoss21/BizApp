@@ -12,7 +12,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 $endpoint = 'update_product';
 
-$response = api_request($endpoint, 'POST', $_POST);
+$response = api_request_auth($endpoint, $user, 'POST', $_POST);
 
 if ($response->status == 'ERROR') {
     $_SESSION['message'] = ['msg' => $response->message, 'color' => 'red', 'type' => $response->status];

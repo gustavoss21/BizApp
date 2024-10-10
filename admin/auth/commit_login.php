@@ -15,7 +15,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 $response = api_request_auth($endpoint,$_POST,'GET',$_POST);
 // printDebug($response, true);
 if ($response->status == 'ERROR') {
-    $_SESSION['message'] = ['msg' => $response->message, 'color' => 'red'];
+    $_SESSION['message'] = ['msg' => 'credenciais inválidas', 'color' => 'red'];
     $_SESSION['input_error'] = $response->input_error;
     $_SESSION['input_values'] = $_POST;
     header('location: login.php');

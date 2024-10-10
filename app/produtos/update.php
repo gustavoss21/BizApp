@@ -15,7 +15,7 @@ $params = [
 ];
 
 $endpoint = 'get_products';
-$response = api_request($endpoint, 'GET', $params);
+$response = api_request_auth($endpoint, $user, 'GET', $params);
 
 $data_product = is_request_error($response);
 $data_product = $data_product[0];

@@ -12,7 +12,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 $endpoint = 'destroy_product';
 
-$response = api_request($endpoint, 'POST', $_POST);
+$response = api_request_auth($endpoint, $user, 'POST', $_POST);
 
 session_start();
 $_SESSION['message'] = ['msg' => 'produto removido com sucesso', 'color' => 'green', 'type' => $response->status];

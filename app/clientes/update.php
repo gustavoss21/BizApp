@@ -16,7 +16,7 @@ $params = [
 ];
 
 $endpoint = 'get_clients';
-$response = api_request($endpoint, 'GET', $params);
+$response = api_request_auth($endpoint, $user, 'GET', $params);
 
 $data_client = is_request_error($response);
 $data_client = $data_client[0];

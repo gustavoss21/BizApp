@@ -12,7 +12,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 $endpoint = 'destroy_client';
 
-$response = api_request($endpoint, $user, 'POST', $_POST);
+$response = api_request_auth($endpoint, $user, 'POST', $_POST);
 
 $_SESSION['message'] = ['msg' => 'Cliente removido com sucesso', 'color' => 'green', 'type' => $response->status];
 

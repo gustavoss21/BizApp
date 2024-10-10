@@ -168,18 +168,17 @@ class api_logic
 
     public function setUser($username = '', $password = '')
     {
-        $this->user['name'] = $username;
+        $this->user['username'] = $username;
         $this->user['password'] = $password;
     }
 
     public function authenticate($super_user = false)
     {
-        $parameters_value = [':nome' => $this->user['name']];
-        $query = 'select id, passwd, nome  from authentication where deleted_at is null and nome = :nome';
+        $parameters_value = [':tokken' => $this->user['username']];
+        $query = 'select id, passwd, nome  from authentication where deleted_at is null and tokken = :tokken';
         $query .= $super_user ? ' and is_super_user is not false' : '';
 
         $conection = new database();
-
         $user = $conection->EXE_QUERY($query, $parameters_value);
         if (!$user) {
             return $this->responseError('Você não tem autorização para fazer essa ação');
@@ -253,6 +252,7 @@ class api_logic
     {
         //checked if the user is logged in
         $response_authenticate = $this->authenticate();
+        // return $this->responseError('Cliente não encontrado',$response_authenticate);
 
         if ($response_authenticate['error']) {
             return $response_authenticate;
@@ -307,7 +307,7 @@ class api_logic
 
         [$query,$filter_query] = $this->setQueryFilterSelect($query_base, $filters, $accepted_filters);
         // return $this->responseError('Usuários não encontrado',[$query,$this->params]);
-        
+
         $conection = new database();
 
         $users = $conection->EXE_QUERY($query, $filter_query);
@@ -327,7 +327,7 @@ class api_logic
         if ($response_authenticate['error']) {
             return $response_authenticate;
         }
-        
+
         //inputs required and validators
         $params = ['nome' => ['min_4'], 'tokken' => ['min_32'], 'password' => ['min_32']];
 
@@ -354,6 +354,7 @@ class api_logic
             return $this->responseError('o nome ou username já está cadastrado');
         }
 
+        $params_data['data']['password'] = password_hash($params_data['data']['password'], PASSWORD_DEFAULT);
         $params_to_query = $this->setQueryParams($params_data['data']);
         $query = 'insert into authentication (nome, tokken, passwd, created_at, updated_at) values(:nome, :tokken, :password, now(), now())';
 
@@ -379,19 +380,17 @@ class api_logic
             return $response_authenticate;
         }
         //inputs required
-        $params = ['id'=>['int'],'nome' => ['min_4']];
+        $params = ['id' => ['int'], 'nome' => ['min_4']];
         $is_unique_inputs = [
             'nome' => ['param' => 'nome = :nome', 'operator' => ' or '],
             'id' => ['param' => 'id <> :id', 'operator' => ' and ']
         ];
         $query = 'update authentication set nome = :nome where id = :id';
 
-        if(isset($this->params['tokken'])){
+        if (isset($this->params['tokken'])) {
             //inputs required
-            $params = ['id'=>['int'],'nome' => ['min_4'], 'tokken' => ['min_32'], 'password' => ['min_32']];
+            $params = ['id' => ['int'], 'nome' => ['min_4'], 'tokken' => ['min_32'], 'password' => ['min_32']];
             $query = 'update authentication set nome = :nome, tokken = :tokken, passwd = :password where id = :id';
-
-
         }
 
         //checks that the parameters are set

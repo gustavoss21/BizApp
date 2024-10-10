@@ -10,7 +10,7 @@ $parameters = [
     'filter' => "id_produto:{$_GET['id_produto']}"
 ];
 
-$request = api_request($endpoint, 'GET', $parameters);
+$request = api_request_auth($endpoint, $user, 'GET', $parameters);
 $data = (is_request_error($request));
 $data = $data[0];
 
