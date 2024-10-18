@@ -5,7 +5,7 @@ require_once '../inc/api_functions.php';
 
 session_start();
 
-$endpoint = 'create_products';
+$endpoint = 'create_product';
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     $_SESSION['message'] = ['msg' => ['Metodo não permitido!'], 'color' => 'green', 'type' => 'ERROR'];
 

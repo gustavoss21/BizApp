@@ -2,14 +2,12 @@
 
 require_once dirname(__FILE__) . '/inc/config.php';
 require_once dirname(__FILE__) . '/inc/api_response.php';
-require_once dirname(__FILE__) . '/inc/database.php';
-require_once dirname(__FILE__) . '/inc/api_logic.php';
+require_once dirname(__FILE__) . '/apiRoute.php';
+
+use Api\ApiRoute;
 
 $api_response = new api_response();
-// echo '<pre>';
-// print_r($_REQUEST);
-// print_r($_SERVER);
-// die();
+
 define('endpoint', $_REQUEST['endpoint']);
 
 if (!$api_response->check_method($_SERVER['REQUEST_METHOD'])) {
@@ -19,7 +17,7 @@ if (!$api_response->check_method($_SERVER['REQUEST_METHOD'])) {
 $api_response->set_method($_SERVER['REQUEST_METHOD']);
 
 $api_response->set_endpoint(endpoint);
-$logic_data = new api_logic($_REQUEST, endpoint);
+$logic_data = new apiRoute($_REQUEST, endpoint);
 
 if (!$logic_data->check_endpoint()) {
     $api_response->api_request_error('Endpoint is not exist');
@@ -33,12 +31,12 @@ if (isset($_SERVER['PHP_AUTH_USER'])) {
 $logic_data->setMethod($api_response->get_method());
 
 //call method endpoint
-$get_data_success = $logic_data->{endpoint}();
+$data_response = $logic_data->route(endpoint);
 
-if ($get_data_success['error']) {
-    $api_response->api_request_error($get_data_success['message'], $get_data_success['input_error']);
+if ($data_response['error']) {
+    $api_response->api_request_error($data_response['message'], $data_response['input_error']);
 }
 
-$api_response->set_data_endpoint($get_data_success['data']);
+$api_response->set_data_endpoint($data_response['data']);
 
 $api_response->send_api_status();

@@ -17,7 +17,7 @@ $response = api_request_auth($endpoint, $user, 'POST', $_POST);
 if ($response->status == 'ERROR') {
     $_SESSION['message'] = ['msg' => $response->message, 'color' => 'red', 'type' => $response->status];
     $_SESSION['input_error'] = $response->input_error;
-    header("Location: update.php/?id_produto={$_POST['id_produto']}");
+    header("Location: update.php/?id={$_POST['id']}");
     die;
 }
 

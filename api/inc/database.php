@@ -1,5 +1,8 @@
 <?php
 
+
+namespace api\inc;
+
 class database
 {
     //==================================================================
@@ -10,18 +13,18 @@ class database
         $results = null;
 
         //connection
-        $connection = new PDO(
+        $connection = new \PDO(
             'pgsql:host=' . DB_SERVER .
             ';port=' . DB_PORT .
             ';dbname=' . DB_NAME,
             DB_USERNAME,
             DB_PASSWORD,
-            [PDO::ATTR_PERSISTENT => true]
+            [\PDO::ATTR_PERSISTENT => true]
         );
 
         if ($debug) {
-            $connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-            $connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+            $connection->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+            $connection->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_WARNING);
         }
 
         //execution
@@ -29,13 +32,13 @@ class database
             if ($parameters != null) {
                 $gestor = $connection->prepare($query);
                 $gestor->execute($parameters);
-                $results = $gestor->fetchAll(PDO::FETCH_ASSOC);
+                $results = $gestor->fetchAll(\PDO::FETCH_ASSOC);
             } else {
                 $gestor = $connection->prepare($query);
                 $gestor->execute();
-                $results = $gestor->fetchAll(PDO::FETCH_ASSOC);
+                $results = $gestor->fetchAll(\PDO::FETCH_ASSOC);
             }
-        } catch (PDOException $e) {
+        } catch (\PDOException $e) {
             return $e;
         }
 
@@ -54,18 +57,18 @@ class database
         //executes a query to the database (INSERT, UPDATE, DELETE)
 
         //connection
-        $connection = new PDO(
+        $connection = new \PDO(
             'pgsql:host=' . DB_SERVER .
             ';port=' . DB_PORT .
             ';dbname=' . DB_NAME,
             DB_USERNAME,
             DB_PASSWORD,
-            [PDO::ATTR_PERSISTENT => true]
+            [\PDO::ATTR_PERSISTENT => true]
         );
 
         if ($debug) {
-            $connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-            $connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+            $connection->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+            $connection->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_WARNING);
         }
 
         //execution
@@ -79,7 +82,7 @@ class database
                 $gestor->execute();
             }
             $connection->commit();
-        } catch (PDOException $e) {
+        } catch (\PDOException $e) {
             $connection->rollBack();
             return false;
         }

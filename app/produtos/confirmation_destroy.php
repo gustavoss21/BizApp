@@ -7,7 +7,7 @@ session_start();
 
 $endpoint = 'get_products';
 $parameters = [
-    'filter' => "id_produto:{$_GET['id_produto']}"
+    'filter' => "id:{$_GET['id']}"
 ];
 
 $request = api_request_auth($endpoint, $user, 'GET', $parameters);
@@ -21,7 +21,7 @@ $title = 'remover';
 $subtitle = 'remover clientes';
 $link_base = '/projeto_api/app/clientes';
 $submit_link = '/projeto_api/app/produtos/destroy.php';
-$parameter_id = 'id_produto';
+$parameter_id = 'id';
 $item_name = 'produto';
 
 $body = require '../parciais/confirmation.php';

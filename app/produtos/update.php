@@ -5,13 +5,13 @@ require_once '../inc/api_functions.php';
 
 session_start();
 
-if (!isset($_GET['id_produto'])) {
+if (!isset($_GET['id'])) {
     header('Location: index.php/');
 }
 
-$id_cliente = $_GET['id_produto'];
+$id = $_GET['id'];
 $params = [
-    'filter' => 'id_produto:' . $id_cliente
+    'filter' => 'id:' . $id
 ];
 
 $endpoint = 'get_products';
@@ -30,7 +30,7 @@ unset($_SESSION['message']);
 $data = [
     'uri' => $submit_uri,
     'inputs' => [
-        'id_product' => ['identifier' => 'id_produto', 'label' => '', 'type' => 'hidden', 'value' => $data_product->id_produto, 'text_error' => ''],
+        'id_product' => ['identifier' => 'id', 'label' => '', 'type' => 'hidden', 'value' => $data_product->id, 'text_error' => ''],
         'produto' => ['identifier' => 'produto', 'label' => 'produto', 'type' => 'text', 'value' => $data_product->produto, 'text_error' => $input_error->produto ?? ''],
         'quantidade' => ['identifier' => 'quantidade', 'label' => 'quantidade', 'type' => 'number', 'value' => $data_product->quantidade, 'text_error' => $input_error->quantidade ?? ''],
     ],

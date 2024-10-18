@@ -21,8 +21,8 @@ unset($_SESSION['message']);
 $title = 'produto';
 $subtitle = 'todos os produtos';
 $link_base = '/projeto_api/app/produtos';
-$link_delete = $link_base . '/confirmation_destroy.php/?id_produto=';
-$link_update = $link_base . '/update.php/?id_produto=';
+$link_delete = $link_base . '/confirmation_destroy.php/?id=';
+$link_update = $link_base . '/update.php/?id=';
 $link_create = $link_base . '/create.php';
 
 $body = require '../parciais/list_objets_html.php';

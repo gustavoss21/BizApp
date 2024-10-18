@@ -9,9 +9,7 @@ $message = [];
 $endpoint = 'get_clients';
 
 $paramenters = ['filter' => implode(';', ['active:true', ...$_GET])];
-// printDebug($user, true);
-$request = api_request_auth($endpoint,$user ,'GET', $paramenters);
-// printDebug($request, true);
+$request = api_request_auth($endpoint,$user ,'GET', $paramenters,);
 
 $data = is_request_error($request);
 
@@ -25,8 +23,8 @@ $title = 'clientes';
 $subtitle = 'clientes';
 $link_base = '/projeto_api/app/clientes';
 $link_create = '/projeto_api/app/clientes/create.php';
-$link_delete = '/projeto_api/app/clientes/confirmation_destroy.php/?id_cliente=';
-$link_update = '/projeto_api/app/clientes/update.php/?id_cliente=';
+$link_delete = '/projeto_api/app/clientes/confirmation_destroy.php/?id=';
+$link_update = '/projeto_api/app/clientes/update.php/?id=';
 $body = require '../parciais/list_objets_html.php';
 
 require '../app.php';

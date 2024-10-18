@@ -7,12 +7,12 @@ session_start();
 
 $endpoint = 'get_clients';
 
-if (!isset($_GET['id_cliente'])) {
+if (!isset($_GET['id'])) {
     header('Location: index.php/');
 }
 
 $parameters = [
-    'filter' => "id_cliente:{$_GET['id_cliente']}"
+    'filter' => "id:{$_GET['id']}"
 ];
 
 $request = api_request_auth($endpoint, $user, 'GET', $parameters);
@@ -27,7 +27,7 @@ $title = 'remover';
 $subtitle = 'remover clientes';
 $link_base = '/projeto_api/app/clientes';
 $submit_link = '/projeto_api/app/clientes/destroy.php';
-$parameter_id = 'id_cliente';
+$parameter_id = 'id';
 $item_name = 'nome';
 $body = require '../parciais/confirmation.php';
 

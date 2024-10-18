@@ -2,7 +2,7 @@
     "name": "santo/projeto_api",
     "autoload": {
         "psr-4": {
-            "app\\": "app/"
+            "Api\\": "api/inc/action_route"
         }
     },
     "authors": [

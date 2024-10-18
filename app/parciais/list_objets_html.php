@@ -2,13 +2,13 @@
 
 // open tags
 $cont = 0;
-$params_hidden = ['id_cliente', 'id_produto'];
-$param_hidden = '';
+$param_hidden = 'id';
 $param_link = ['nome', 'produto'];
 
 if (!$data) {
     return $body = '<div style="color:red;text-align:center;">nenhum ' . $title . ' cadastrado';
 }
+// printDebug($data);
 //table head / set icon add
 $html = <<<HTML
 
@@ -31,7 +31,7 @@ $html = <<<HTML
 //set header table
 $attribute_object = array_keys((array) $data[0]);
 foreach ($attribute_object as $key) {
-    if (in_array($key, $params_hidden)) {
+    if ($key === $param_hidden) {
         continue;
     }
 
@@ -46,12 +46,13 @@ $html .= '</tr></thead><tbody>';
 foreach ($data as $value) {
     $html .= '<tr>';
     foreach ($attribute_object as $key) {
-        if (in_array($key, $params_hidden)) {
+        if ($key === $param_hidden) {
             $param_hidden = $key;
             continue;
         }
 
         $set_html_value = $value->$key;
+
         // set url table link item
         if (in_array($key, $param_link)) {
             $url = $link_base . '/?filter=' . $param_hidden . ':' . $value->$param_hidden;

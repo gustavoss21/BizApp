@@ -39,7 +39,7 @@ function api_request($endpoint, $method = 'GET', $user, $variables = [], $debug 
     return json_decode($response);
 };
 
-function api_request_auth($endpoint, array $user, $method = 'GET', $variables = [])
+function api_request_auth($endpoint, array $user, $method = 'GET', $variables = [],$debug=false)
 {
     // return [$endpoint, $method, $variables, $user, $debug ];
 
@@ -75,7 +75,10 @@ function api_request_auth($endpoint, array $user, $method = 'GET', $variables = 
     }
 
     curl_close($client);
-    // printDebug(['endp'=>$endpoint,'user'=> $user, 'metho'=>$method,'varia'=> $variables],true);
+    if($debug){
+        printDebug($response,true);
+
+    }
     return json_decode($response);
 };
 
