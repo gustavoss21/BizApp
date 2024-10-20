@@ -1,4 +1,5 @@
 <?php
+$allowedRoute = true;
 
 require_once 'inc/config.php';
 require_once 'inc/api_functions.php';

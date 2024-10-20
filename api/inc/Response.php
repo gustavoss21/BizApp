@@ -2,6 +2,10 @@
 
 namespace Api\inc;
 
+if(!isset($allowedRoute)){
+    die('<div style="color:red;">Rota não encontrada</div>');
+}
+
 trait Response
 {
     public static function responseError($m, array $input_error = [], $data = [])

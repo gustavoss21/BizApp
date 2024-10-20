@@ -1,9 +1,8 @@
 <?php
 
-// $user = [
-//     'username' => 'gustavo',
-//     'password' => '123456789'
-// ];
+if(!isset($allowedRoute)){
+    die('<div style="color:red;">Rota não encontrada</div>');
+}
 
 $user = [
     'username' => 'yYghjlurK3ZHp15UFmWBwXdqR9TxkbQc',

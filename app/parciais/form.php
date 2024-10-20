@@ -1,5 +1,9 @@
 <?php
 
+if(!isset($allowedRoute)){
+    die('<div style="color:red;">Rota não encontrada</div>');
+}
+
 $html = <<<HTML
 
     <h1 style="text-align: center;color:rgb(148 11 11)">$subtitle</h1>

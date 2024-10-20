@@ -1,7 +1,10 @@
 <?php
 
-
 namespace api\inc;
+
+if(!isset($allowedRoute)){
+    die('<div style="color:red;">Rota não encontrada</div>');
+}
 
 class database
 {

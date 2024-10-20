@@ -1,5 +1,9 @@
 <?php
 
+if(!isset($allowedRoute)){
+    die('<div style="color:red;">Rota não encontrada</div>');
+}
+
 function api_request($endpoint, $method = 'GET', $variables = [], $debug = false)
 {
     $cred = isset($_SESSION["Authorization"])?$_SESSION["Authorization"]:''; 

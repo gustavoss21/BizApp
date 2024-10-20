@@ -2,6 +2,10 @@
 
 namespace Api;
 
+if(!isset($allowedRoute)){
+    die('<div style="color:red;">Rota não encontrada</div>');
+}
+
 require_once 'inc/Filter.php';
 require_once 'inc/Response.php';
 require_once 'inc/route_base.php';

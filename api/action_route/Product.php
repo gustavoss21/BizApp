@@ -2,6 +2,10 @@
 
 namespace Api\action_route;
 
+if(!isset($allowedRoute)){
+    die('<div style="color:red;">Rota não encontrada</div>');
+}
+
 use Api\inc\Filter;
 use Api\inc\Response;
 use Api\inc\Validation;

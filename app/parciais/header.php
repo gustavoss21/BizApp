@@ -1,3 +1,9 @@
+<?php
+if(!isset($allowedRoute)){
+    die('<div style="color:red;">Rota não encontrada</div>');
+}
+?>
+
 <header>
     <nav id="navbar">
         <div id="content-nav">

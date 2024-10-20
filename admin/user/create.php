@@ -1,4 +1,5 @@
 <?php
+$allowedRoute = true;
 
 require_once '../inc/config.php';
 require_once '../inc/api_functions.php';
@@ -41,7 +42,7 @@ $data = [
     ],
     'elements' => [
         'btn-submit' => ['identifier' => 'submit-form', 'class' => 'input-submit input-element', 'tag_type' => 'button', 'label' => 'Criar', 'action' => 'type="submit"'],
-        'btn-back' => ['identifier' => 'btn-back', 'tag_type' => 'a', 'class' => 'element-back', 'label' => 'Voltar', 'action' => 'href="clientes/"'],
+        'btn-back' => ['identifier' => 'btn-back', 'tag_type' => 'a', 'class' => 'element-back', 'label' => 'Voltar', 'action' => 'href="../"'],
     ]];
 $title = 'Usuário';
 $subtitle = 'novo Usuário';

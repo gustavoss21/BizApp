@@ -1,5 +1,9 @@
 <?php
 
+if(!isset($allowedRoute)){
+    die('<div style="color:red;">Rota não encontrada</div>');
+}
+
 // open tags
 $cont = 0;
 $param_hidden = 'id';

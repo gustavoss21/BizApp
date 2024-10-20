@@ -1,4 +1,7 @@
 <?php
+if(!isset($allowedRoute)){
+    die('<div style="color:red;">Rota não encontrada</div>');
+}
 
 // open tags
 $param_link = 'nome';

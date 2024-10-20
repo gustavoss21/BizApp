@@ -2,6 +2,9 @@
 
 namespace Api\action_route;
 
+if(!isset($allowedRoute)){
+    die('<div style="color:red;">Rota não encontrada</div>');
+}
 require_once dirname(__FILE__, 2) . '/inc/Response.php';
 require_once dirname(__FILE__, 2) . '/inc/Validation.php';
 require_once dirname(__FILE__, 2) . '/inc/database.php';

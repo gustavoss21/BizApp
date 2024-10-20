@@ -1,4 +1,7 @@
 <?php
+if(!isset($allowedRoute)){
+    die('<div style="color:red;">Rota não encontrada</div>');
+}
 
 define('DB_SERVER','localhost');
 define('DB_NAME','db_api');

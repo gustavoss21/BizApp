@@ -2,6 +2,10 @@
 
 namespace Api\inc;
 
+if(!isset($allowedRoute)){
+    die('<div style="color:red;">Rota não encontrada</div>');
+}
+
 trait Filter
 {
     public static function setQueryFilterSelect(string $queryBase, $filters, $accepted_filters)

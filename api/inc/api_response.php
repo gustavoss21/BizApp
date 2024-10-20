@@ -1,5 +1,9 @@
 <?php
 
+if(!isset($allowedRoute)){
+    die('<div style="color:red;">Rota não encontrada</div>');
+}
+
 class api_response
 {
     private $data;

@@ -2,6 +2,10 @@
 
 namespace Api\inc;
 
+if(!isset($allowedRoute)){
+    die('<div style="color:red;">Rota não encontrada</div>');
+}
+
 class RouteBase{
     use Filter;
     use Response;

@@ -1,4 +1,7 @@
 <?php
+if(!isset($allowedRoute)){
+    die('<div style="color:red;">Rota não encontrada</div>');
+}
 
 function api_request($endpoint, $method = 'GET', $user, $variables = [], $debug = false)
 {

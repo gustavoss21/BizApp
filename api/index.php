@@ -1,4 +1,5 @@
 <?php
+$allowedRoute = true;
 
 require_once dirname(__FILE__) . '/inc/config.php';
 require_once dirname(__FILE__) . '/inc/api_response.php';
