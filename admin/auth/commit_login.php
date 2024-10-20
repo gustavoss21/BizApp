@@ -4,8 +4,10 @@ require_once '../inc/config.php';
 require_once '../inc/api_functions.php';
 
 session_start();
+
 $message = '';
-$endpoint = 'authenticate';
+$endpoint = 'superAuthorizationRequired';
+
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     $_SESSION['message'] = ['msg' => ['Metodo não permitido!'], 'color' => 'green', 'type' => 'ERROR'];
     header('Location: create.php/');
@@ -13,7 +15,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 $response = api_request_auth($endpoint,$_POST,'GET',$_POST);
-// printDebug($response, true);
+
 if ($response->status == 'ERROR') {
     $_SESSION['message'] = ['msg' => 'credenciais inválidas', 'color' => 'red'];
     $_SESSION['input_error'] = $response->input_error;

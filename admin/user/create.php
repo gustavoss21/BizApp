@@ -6,7 +6,7 @@ require_once '../inc/api_functions.php';
 session_start();
 
 $message = '';
-$endpoint = 'authenticate';
+$endpoint = 'superAuthorizationRequired';
 $response = api_request($endpoint,'GET');
 // printDebug($response, true);
 if ($response->status == 'ERROR') {

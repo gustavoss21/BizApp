@@ -11,15 +11,12 @@ use Api\inc\Response;
 use Api\inc\Validation;
 use Api\inc\database;
 use Api\inc\Filter;
-use DateTime;
 
 class Cliente
 {
     use Response;
     use Validation;
     use Filter;
-
-    public $queryBase;
 
     public function __construct(
         private int $id = 0,
@@ -50,8 +47,6 @@ class Cliente
 
     public function setParameter($parameter, $value)
     {
-        $teste = $this->active;
-        $teste1 = $this->{$parameter};
         if (!isset($this->{$parameter})) {
             return;
         }
@@ -63,7 +58,7 @@ class Cliente
      *check if there is already a registered customer
      *@return array <p>returned response error or success
      */
-    public function check_client_exists(): array
+    public function check_client_exists(): bool
     {
         $isUniqueInputs = [
             'nome' => ['param' => 'nome = :nome', 'operator' => ' or ', 'exclusive' => true],
@@ -72,16 +67,13 @@ class Cliente
         ];
         $clientParametersToValidation = $this->get_client_parameters();
         $parametersToAvoidDuplication = array_intersect_key($clientParametersToValidation, $isUniqueInputs);
-        $queryBase = 'select id_cliente, nome, email, deleted_at from clientes';
+        $queryBase = 'select id_cliente from clientes';
 
         //commit the verication
         $isExist = $this->exist($queryBase, $parametersToAvoidDuplication, $isUniqueInputs);
 
-        if (count($isExist) > 0) {
-            return $this->responseError('email ou nome já está cadastrado');
-        }
 
-        return $this->response($isExist, 'Cliente ok');
+        return !empty($isExist);
     }
 
     public function get_clients()
@@ -149,36 +141,20 @@ class Cliente
     public function destroy_client()
     {
         $inputsRequired = ['id' => ['int']];
+        $queryDestroy = 'UPDATE clientes SET deleted_at=now() WHERE id_cliente = :id';
 
         //checks that the parameters are set
         $clientStatus = $this->issetParamasValidation($inputsRequired, $this->get_client_parameters());
         $clientStatus['data']['active'] = true;
+        
         if (!$clientStatus['valid']) {
             return $this->responseError('existem parâmetros inválidos', $clientStatus['erros']);
         }
 
-        //check if exist register of inputs
-        $check_exist_inputs = [
-            'id' => ['param' => 'id_cliente = :id', 'operator' => ' and ', 'exclusive' => false],
-            'active' => ['param' => 'deleted_at is null', 'operator' => ' and ', 'exclusive' => false],
-        ];
-
-        $dataToCheckExistence = array_intersect_key($clientStatus['data'], $check_exist_inputs);
-        $queryBase = 'select id_cliente, deleted_at from clientes';
-        $isExist = $this->exist($queryBase, $dataToCheckExistence, $check_exist_inputs);
-
-        if (count($isExist) <= 0) {
-            return $this->responseError('cliente não encontrado, tente mais tarde!');
-        }
-
+        // commit client destroy
         $paramsToQuery = $this->setQueryParams($clientStatus['data']);
-        $query = 'UPDATE clientes SET deleted_at=now() WHERE id_cliente = :id';
-
         $connection = new database();
-        $result = $connection->EXE_NON_QUERY($query, $paramsToQuery);
-        if (!$result) {
-            return $this->responseError('houve um erro inesperado');
-        }
+        $result = $connection->EXE_NON_QUERY($queryDestroy, $paramsToQuery);
 
         return self::response($result, 'remove success');
     }

@@ -19,7 +19,8 @@ class Product
         private string $quantidade = '',
         private string $deleted_at = '',
         private bool|null $active = false,
-        private bool|null $inactive = false,)
+        private bool|null $inactive = false
+        )
     {
     }
 
@@ -60,7 +61,7 @@ class Product
      *check if there is already a registered customer
      *@return array <p>returned response error or success
      */
-    public function check_product_exists()
+    public function checkProductExists()
     {
         $isUniqueInputs = [
             'produto' => ['param' => 'produto = :produto', 'operator' => ' or ', 'exclusive' => true],
@@ -73,7 +74,7 @@ class Product
         //commit the verication
         $product = $this->exist($queryBase, $parametersToAvoidDuplication, $isUniqueInputs);
 
-        return count($product);
+        return !empty($product);
     }
 
     /**
@@ -208,13 +209,6 @@ class Product
             return $this->responseError('existem parâmetros inválidos', $productStatus['erros']);
         }
 
-        //check if exist register of inputs
-        $clientParameterForExistenceCheck = array_intersect_key($productStatus['data'], $checkExistInputs);
-        $product = $this->exist($queryBase, $clientParameterForExistenceCheck, $checkExistInputs);
-
-        if (count($product) <= 0) {
-            return $this->responseError('produto não encontrado, tente mais tarde!');
-        }
 
         //commits destruction
         $paramsToQuery = $this->setQueryParams($productStatus['data']);

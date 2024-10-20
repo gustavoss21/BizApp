@@ -25,4 +25,3 @@
     <script src="/projeto_api/app/assets/js/script.js"></script>
 </body>
 </html>
-tex

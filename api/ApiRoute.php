@@ -16,9 +16,7 @@ use Api\action_route\Product;
 use Api\action_route\User;
 use Api\inc\RouteBase;
 
-// echo '<pre>';
-// print_r(get_declared_classes());
-// die;
+
 class ApiRoute extends RouteBase
 {
     public function __construct(protected $params, protected $endpoint)
@@ -39,12 +37,11 @@ class ApiRoute extends RouteBase
                 'autheticationRequired',
                 'postRequiredMethod'
             ],
-            'destroy_client'=>[
+            'destroy_client' => [
                 // 'superAuthorizationRequired',
                 'autheticationRequired',
                 'postRequiredMethod'
             ],
-
             'get_products' => [
                 // 'superAuthorizationRequired',
                 'autheticationRequired',
@@ -60,17 +57,30 @@ class ApiRoute extends RouteBase
                 'autheticationRequired',
                 'postRequiredMethod'
             ],
-            'destroy_products'=>[
+            'destroy_products' => [
                 // 'superAuthorizationRequired',
                 'autheticationRequired',
+                'postRequiredMethod'
+            ],
+
+            'getUsers' => [
+                'superAuthorizationRequired',
+                'getRequiredMethod'
+            ],
+            'createUser' => [
+                'superAuthorizationRequired',
+                'postRequiredMethod'
+            ],
+            'updateUser' => [
+                'superAuthorizationRequired', 
+                'postRequiredMethod'
+            ],
+            'destroyUser' => [
+                'superAuthorizationRequired',
                 'postRequiredMethod'
             ]
 
         ];
-    }
-    protected function authenticate()
-    {
-        // $this->user->authenticate();
     }
 
     //routes api
@@ -95,9 +105,10 @@ class ApiRoute extends RouteBase
         self::setClassParameters($cliente, $this->params);
 
         //avoid duplicate user
-        $responseClient = $cliente->check_client_exists();
-        if ($responseClient['error']) {
-            return $responseClient;
+        $ClientExist = $cliente->check_client_exists();
+
+        if ($ClientExist) {
+            return Response::responseError('email or name is already registered');
         };
 
         //create client
@@ -111,9 +122,10 @@ class ApiRoute extends RouteBase
         self::setClassParameters($cliente, $this->params);
 
         //avoid duplicate client
-        $responseClient = $cliente->check_client_exists();
-        if ($responseClient['error']) {
-            return $responseClient;
+        $ClientExist = $cliente->check_client_exists();
+        
+        if ($ClientExist) {
+            return Response::responseError('email or name is already registered');
         };
 
         //update client
@@ -125,34 +137,43 @@ class ApiRoute extends RouteBase
         //set client parameters
         $cliente = new Cliente();
         self::setClassParameters($cliente, $this->params);
+        
+        //avoid removing already removed client
+        $ClientExist = $cliente->check_client_exists();
+
+        if (!$ClientExist) {
+            return Response::responseError('client not fund, try again later');
+        };
+        
         //destroy client
         return $cliente->destroy_client();
     }
 
     protected function get_products()
     {
-        //get client parameters
+        //get product parameters
         $paramsToFilterQuery = $this->params['filter'] ?? '';
         $produtsParameters = $this->getFilter($paramsToFilterQuery);
 
-        //set clients parameters
+        //set products parameters
         $product = new Product();
         self::setClassParameters($product, $produtsParameters);
 
-        //get and return clients
+        //get and return products
         return $product->get_products();
     }
 
     protected function create_product()
     {
-        //set client parameters
+        //set product parameters
         $product = new Product();
         self::setClassParameters($product, $this->params);
 
-        //avoid duplicate user
-        $responseClient = $product->check_product_exists();
-        if ($responseClient['error']) {
-            return $responseClient;
+        //avoid duplicate product
+        $ProductExist = $product->checkProductExists();
+
+        if ($ProductExist) {
+            return Response::responseError('the product is already registered');
         };
 
         //create Product
@@ -161,29 +182,128 @@ class ApiRoute extends RouteBase
 
     protected function update_product()
     {
-        //set client parameters
+        //set product parameters
         $product = new Product();
         self::setClassParameters($product, $this->params);
 
-        //avoid duplicate client
-        $productExist = $product->check_product_exists();
-        
-        if ($productExist) {
-            return $this->responseError('Produto já está cadastrado');
+        //avoid duplicate product
+        $ProductExist = $product->checkProductExists();
 
-        }
+        if ($ProductExist) {
+            return Response::responseError('the product is already registered');
+        };
 
-        //update client
+        //update product
         return $product->update_product();
     }
 
     protected function destroy_product()
     {
-        //set client parameters
+        //set product parameters
         $product = new Product();
         self::setClassParameters($product, $this->params);
 
-        //destroy client
+        //avoid removing already removed product
+        $productExist = $product->checkProductExists();
+
+        if (!$productExist) {
+            return $this->responseError('the product not found, try again later!');
+        }
+
+        //destroy product
         return $product->destroy_product();
+    }
+
+    protected function getUsers()
+    {
+        //get user parameters
+        $paramsToFilterQuery = $this->params['filter'] ?? '';
+        $produtsParameters = $this->getFilter($paramsToFilterQuery);
+
+        //set user parameters
+        $user = new User();
+        self::setClassParameters($user, $produtsParameters);
+
+        //get and return users
+        return $user->get_users();
+    }
+
+    protected function createUser()
+    {
+        //set user parameters
+        $user = new User();
+        self::setClassParameters($user, $this->params);
+
+        //avoid duplicate user
+        $userExists = $user->checkUserExists();
+
+        if ($userExists) {
+            return Response::responseError('the user is already registered');
+        };
+
+        //create User
+        return $user->create_user();
+    }
+
+    protected function updateUser()
+    {
+        //set user parameters
+        $user = new User();
+        self::setClassParameters($user, $this->params);
+
+        //avoid duplicate user
+        $userExist = $user->checkUserExists();
+        if ($userExist) {
+            return $this->responseError('the user is already registed');
+        }
+        
+        $isSuperUser = $user->checkIsSuperUser();
+        if($isSuperUser){
+            return $this->responseError('it is impossible to change user');
+        }
+
+        //update user
+        return $user->updateUser();
+    }
+
+    protected function activeUser()
+    {
+        //set user parameters
+        $user = new User();
+        self::setClassParameters($user, $this->params);
+        
+        //avoid removing already removed user
+        $usertExist = $user->checkUserExists();
+
+        if (!$usertExist) {
+            return $this->responseError('the user not found, try again later!');
+        }
+
+        //destroy user
+        return $user->activeUser();
+    }
+
+    protected function destroyUser()
+    {
+        //set user parameters
+        $user = new User();
+        self::setClassParameters($user, $this->params);
+
+        //avoid removing already removed user
+        $usertExist = $user->checkUserExists();
+
+        if (!$usertExist) {
+            return $this->responseError('the user not found, try again later!');
+        }
+
+        // avoid deactivate super user
+        $isSuperUser = $user->checkIsSuperUser();
+        
+        if($isSuperUser){
+            return $this->responseError('it is impossible to change user');
+        }
+
+        //destroy user
+        return $user->destroy_user();
     }
 }

@@ -100,7 +100,9 @@ function is_request_error($request)
     if (!isset($request->data) || $request->status == 'ERROR') {
         $message['color'] = $request->status;
         $message['msg'] = $request->message;
-        require 'layout.php';
+
+        require '../layout.php';
+        
         die();
     }
 

@@ -10,7 +10,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
     header('Location: index.php/');
 }
-$endpoint = 'destroy_user';
+$endpoint = 'destroyUser';
 
 $response = api_request($endpoint, 'POST', $_POST);
 // printDebug($response,true);

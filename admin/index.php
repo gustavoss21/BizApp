@@ -18,7 +18,7 @@ if (!(isset($_SESSION['Authorization']) and $_SESSION['Authorization'])) {
 }
 
 $message = [];
-$endpoint = 'get_users';
+$endpoint = 'getUsers';
 // printDebug($_SESSION);
 // session_destroy();
 $paramers = ['filter' => implode(';', $_GET)];

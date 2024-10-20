@@ -14,7 +14,6 @@ trait Validation
     protected static function exist(string $queryBase, array $clientParameters, $accepted_filters)
     {
         [$query,$queryToParameters] = self::setQueryFilterSelect($queryBase, $clientParameters, $accepted_filters);
-        // return [$query, $queryToParameters];
         $conection = new database();
         $result = $conection->EXE_QUERY($query, $queryToParameters);
 

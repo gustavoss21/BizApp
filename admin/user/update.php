@@ -10,7 +10,7 @@ if (!isset($_GET['id'])) {
     header('Location: index.php/');
 }
 
-$endpoint = 'get_users';
+$endpoint = 'getUsers';
 $paramers = ['filter' => 'id:'.$_GET['id']];
 // printDebug($paramers, true);
 $response = api_request($endpoint, 'GET', $paramers);
@@ -35,7 +35,7 @@ $data = [
     'elements' => [
         'btn-new-tokken' => ['identifier' => 'new-tokken-form', 'class' => 'new-tokken-form input-element', 'tag_type' => 'a', 'label' => 'Gerar nova senha e tokken', 'action' => 'href="?new_tokken=true&id='.$_GET['id'].'"'],
         'btn-submit' => ['identifier' => 'submit-form', 'class' => 'input-submit input-element', 'tag_type' => 'button', 'label' => 'Atualizar', 'action' => 'type="submit"'],
-        'btn-back' => ['identifier' => 'btn-back', 'tag_type' => 'a', 'class' => 'element-back', 'label' => 'Voltar', 'action' => 'href="../index.php"'],
+        'btn-back' => ['identifier' => 'btn-back', 'tag_type' => 'a', 'class' => 'element-back', 'label' => 'Voltar', 'action' => 'href="../../index.php"'],
     ]];
 
 if(isset($_GET['new_tokken']) and !empty($_GET['new_tokken'])){
@@ -49,6 +49,8 @@ if(isset($_GET['new_tokken']) and !empty($_GET['new_tokken'])){
     // printDebug($data);
 
 }
+
+
 $title = 'Usuário';
 $subtitle = 'Atualizar Usuário ' . $data_user->nome;
 $body = require '../parciais/form.php';

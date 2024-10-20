@@ -24,4 +24,3 @@
     <script src="/projeto_api/admin/assets/js/script.js"></script>
 </body>
 </html>
-tex

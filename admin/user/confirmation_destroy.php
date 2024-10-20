@@ -6,8 +6,9 @@ require_once '../inc/api_functions.php';
 session_start();
 
 $message = '';
-$endpoint = 'authenticate';
+$endpoint = 'superAuthorizationRequired';
 $response = api_request($endpoint, 'GET');
+
 if ($response->status == 'ERROR') {
     $_SESSION['message'] = ['msg' => $response->message, 'color' => 'red'];
     $_SESSION['input_error'] = $response->input_error;
@@ -17,7 +18,7 @@ if ($response->status == 'ERROR') {
 }
 // printDebug($response, true);
 
-$endpoint = 'get_users';
+$endpoint = 'getUsers';
 
 if (!isset($_GET['id'])) {
     header('Location: index.php/');
@@ -39,6 +40,7 @@ $link_base = '/projeto_api/admin';
 $submit_link = $link_base . '/user/destroy.php';
 $parameter_id = 'id';
 $item_name = 'nome';
+
 $body = require '../parciais/confirmation.php';
 
 require '../layout.php';
