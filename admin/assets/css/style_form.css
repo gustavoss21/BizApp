@@ -75,3 +75,28 @@
     display: block;
     text-align: center;
 }
+
+#rule-form{
+    margin-top: 9px;
+    color: red;
+}
+
+.radio{
+    margin: 0 15px 0 5px;
+}
+
+.input-error:invalid{
+    background-color: ivory;
+    border: none;
+    outline: 2px solid red;
+    border-radius: 5px;
+}
+
+.error-inactive{
+    display: none;
+}
+
+.error-active{
+    display: block;
+    color: red;
+}

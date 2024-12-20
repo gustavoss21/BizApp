@@ -1,45 +1,102 @@
 <?php
-if(!isset($allowedRoute)){
+
+if (!isset($allowedRoute)) {
     die('<div style="color:red;">Rota não encontrada</div>');
 }
 
-$html = <<<HTML
+class SetForm
+{
+    public static $optionPosition = '';
+    public $titleForm;
+    public $attributes;
+    public $message;
+    public $openForm;
+    public $elements;
+    public $closeForm;
+    public $input_errors;
 
-    <h1 style="text-align: center;color:rgb(148 11 11)">$subtitle</h1>
-    <div class="content-form">
-        <form class="from-control" action="{$data['uri']}" method="post">
-            
-    HTML;
-
-// main body / set form
-
-//set input form
-foreach ($data['inputs'] as $input_data) {
-    $html .= <<<HTML
-            <div class="content-input">
-                <label for="{$input_data['identifier']}">{$input_data['label']}</label>
-                <input class="input-element" type="{$input_data['type']}" name="{$input_data['identifier']}" id="{$input_data['identifier']}" value="{$input_data['value']}" {$input_data['other_params']} >
-            HTML;
-    // set input error message
-    if ($input_data['text_error']) {
-        $html .= <<<HTML
-            <p style="color:red;">{$input_data['text_error']}</p>
-        HTML;
+    public function __construct(string $titleForm, $attributes,$input_errors)
+    {
+        // class="from-control" id="$idForm" action="$this->actionForm" method="$this->methodForm"
+        $this->titleForm = $titleForm;
+        $this->attributes = $attributes;
+        $this->input_errors = $input_errors;
+        $this->message = '';
+        $this->openForm = '';
+        $this->elements = [];
+        $this->closeForm = '';
     }
-    $html .= '</div>';
-}
 
-//set button form
-foreach ($data['elements'] as $element) {
-    $html .= <<<HTML
-        <{$element['tag_type']} {$element['action']} id="{$element['identifier']}" class="{$element['class']}">{$element['label']}</{$element['tag_type']}>
+    public function setMessage(string $message = '')
+    {
+        $this->message = $message;
+    }
+
+    public function setElement(string $tag, array $parameters = [], $innerElement = '', array $nonKayAttributes = [],int $position = null)
+    {
+        $this->elements[] = ['tag' => $tag, 'attributes' => $parameters, 'nonKayAttributes' => $nonKayAttributes, 'innerElement' => $innerElement];
+    }
+
+    public function setInputError(array $input_error = [])
+    {
+    }
+
+    public function buildElement(string $tag, array $attributes = [], $innerElement = '', array $nonKayAttributes = []): string
+    {
+        $elements = '';
+
+        //set parameters
+        foreach ($attributes as $kay => $attribute) {
+            $elements .= "$kay='$attribute' ";
+        }
+
+        foreach ($nonKayAttributes as $kay => $attribute) {
+            $elements .= "$attribute";
+        }
+        /////////
+        if ($tag === 'input') {
+            $activeClassError = 'error-active';
+            $inactiveClassError = 'error-inactive';
+            $tagError = "<p class='$inactiveClassError'></p>";
+            $groupInput = "<label for='{$attributes['name']}'>$innerElement</label><input $elements>";
+            $elementError = $this->input_errors[$attributes['name']]??null;
+            
+            if($elementError){
+                $tagError = "<p class='$activeClassError'>$elementError</p>";
+            }
+
+            $groupInput .= $tagError;
+            
+            return $groupInput;
+        }
+
+        return "<$tag $elements>$innerElement</$tag>";
+    }
+
+    protected function buildinnerForm()
+    {
+        $innerForm = '';
+
+        foreach ($this->elements as $field) {
+            $innerForm .= '<div class="content-input">'.$this->buildElement(...$field).'</div>';
+        }
+
+        return $innerForm;
+    }
+
+    public function buildForm()
+    {
+        $innerForm = $this->buildinnerForm();
+        $form = <<<HTML
+            <h1 style="text-align: center;color:rgb(148 11 11)">$this->titleForm</h1>
+            <p id="message"></p>
+            <div class="content-form">
+                <form $this->attributes >$innerForm</form>
+            </div>
         HTML;
+
+        return $form;
+    }
 }
 
-// close tags
-$html .= <<<HTML
-        </form>
-    </div>
-HTML;
 
-return $html;

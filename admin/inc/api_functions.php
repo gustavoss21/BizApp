@@ -14,7 +14,6 @@ function api_request($endpoint, $method = 'GET', $variables = [], $debug = false
     // return base64_decode($cred);
     
     $client = curl_init();
-    curl_setopt($client, CURLOPT_HTTPHEADER, $headers);
 
     curl_setopt($client, CURLOPT_RETURNTRANSFER, true);
 
@@ -29,9 +28,15 @@ function api_request($endpoint, $method = 'GET', $variables = [], $debug = false
 
     if ($method == 'POST') {
         $variables = array_merge(['endpoint' => $endpoint], $variables);
-        curl_setopt($client, CURLOPT_POSTFIELDS, $variables);
+        $headers[] = 'Content-Type: application/x-www-form-urlencoded';
+
+        curl_setopt($client, CURLOPT_POST, true);
+        $query = buildQuery($variables);
+        curl_setopt($client, CURLOPT_POSTFIELDS, $query);
+
     }
 
+    curl_setopt($client, CURLOPT_HTTPHEADER, $headers);
     curl_setopt($client, CURLOPT_URL, $url);
 
     $response = curl_exec($client);
@@ -44,7 +49,7 @@ function api_request($endpoint, $method = 'GET', $variables = [], $debug = false
     return json_decode($response);
 };
 
-function api_request_auth($endpoint, array $user, $method = 'GET', $variables = [])
+function api_request_auth($endpoint, array $user=[], $method = 'GET', $variables = [])
 {
     // return [$endpoint, $method, $variables, $user, $debug ];
 
@@ -67,7 +72,7 @@ function api_request_auth($endpoint, array $user, $method = 'GET', $variables = 
     if ($method == 'POST') {
         $variables = array_merge(['endpoint' => $endpoint], $variables);
 
-        curl_setopt($client, CURLOPT_POSTFIELDS, $variables);
+        curl_setopt($client, CURLOPT_POSTFIELDS, buildQuery($variables));
     }
 
     curl_setopt($client, CURLOPT_HTTPHEADER, $headers);
@@ -111,4 +116,18 @@ function is_request_error($request)
     }
 
     return $request->data;
+}
+
+
+function buildQuery($array, $prefix = '') {
+    $query = [];
+    foreach ($array as $key => $value) {
+        $fullKey = $prefix === '' ? $key : "{$prefix}[{$key}]";
+        if (is_array($value)) {
+            $query[] = buildQuery($value, $fullKey);
+        } else {
+            $query[] = urlencode($fullKey) . '=' . urlencode($value);
+        }
+    }
+    return implode('&', $query);
 }

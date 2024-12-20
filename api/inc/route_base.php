@@ -2,6 +2,8 @@
 
 namespace Api\inc;
 
+use DateTime;
+
 if(!isset($allowedRoute)){
     die('<div style="color:red;">Rota não encontrada</div>');
 }
@@ -15,6 +17,7 @@ class RouteBase{
     protected $user;
     protected $params;
     protected $endpoint;
+    protected $response_method = '';
     protected $requiredRoutePermissions;
 
         /**
@@ -28,6 +31,27 @@ class RouteBase{
             $class->setParameter($parameter, $value);
     
         }
+    }
+
+    public function authorizateOnlyActive(){
+        $isAutheticate = $this->autheticationRequired();
+        $parametersDenied = ['deleted_at', 'inactive'];
+        
+        if(!$isAutheticate['error']){
+            return self::responseSuccess([], 'request authorizated');
+        }
+
+        if(array_intersect_key($parametersDenied,$this->params)){
+            return self::responseError('request unauthorized');
+
+        }
+
+        return self::responseSuccess([], 'request authorizated');
+
+    }
+
+    public function authorizationOnlyOne(){
+        
     }
 
     public function check_endpoint()
@@ -62,7 +86,7 @@ class RouteBase{
             return Response::responseError('method is not permitted');
 
         }
-        return Response::response([],'method is ok');
+        return Response::responseSuccess([],'method is ok');
     }
 
     public function postRequiredMethod(){
@@ -70,11 +94,11 @@ class RouteBase{
             return Response::responseError('method is not permitted');
 
         }
-        return Response::response([],'method is ok');
+        return Response::responseSuccess([],'method is ok');
     }
 
     protected function CheckRoutePermission($endpoint){
-        $status = Response::response([], 'User ok');
+        $status = $this->responseSuccess([], 'User ok');
 
         //case not have required permission
         if(empty($this->requiredRoutePermissions[$endpoint])){
@@ -102,5 +126,12 @@ class RouteBase{
         }
         
         return $this->$endpoint($this->params);
+    }
+
+    public function projectionData($days){
+        $interval = "+$days days";
+        $date = new DateTime();
+        $date->modify($interval);
+        return $date->format('d/m/Y H:i:s');
     }
 }

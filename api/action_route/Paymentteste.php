@@ -22,14 +22,14 @@ class Cliente
     use Validation;
     use Filter;
 
+
     public function __construct(
         private int $id = 0,
-        private string $nome = '',
-        private string $email = '',
-        private string $telefone = '',
-        private string $deleted_at = '',
-        private bool|null $active = false,
-        private bool|null $inactive = false,
+        private string $id_costomer = '',
+        private string $id_produto = '',
+        private string $status = '',
+        private string $created_at = '',
+        private string $updated_at = '',
     ) {
     }
 
@@ -91,6 +91,7 @@ class Cliente
             'inactive' => ['param' => 'deleted_at is not null', 'operator' => ' and ', 'exclusive' => false],
         ];
         $client_parameters = $this->get_client_parameters();
+
         [$filter_query,$queryParameters] = self::setQueryFilterSelect($client_parameters, $acceptedQueryFilters);
         $query = $queryBase;
         

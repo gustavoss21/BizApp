@@ -80,3 +80,7 @@ a{
     color: red;
     padding: 5px 10px;
 }
+
+#message{
+    visibility: hidden;
+}

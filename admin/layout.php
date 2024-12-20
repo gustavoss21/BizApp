@@ -28,5 +28,6 @@ if(!isset($allowedRoute)){
     echo $body;
     ?>
     <script src="/projeto_api/admin/assets/js/script.js"></script>
+    <script src="/projeto_api/admin/assets/js/form.js"></script>
 </body>
 </html>

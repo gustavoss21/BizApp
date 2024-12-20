@@ -2,7 +2,7 @@
 
 namespace Api\action_route;
 
-if(!isset($allowedRoute)){
+if (!isset($allowedRoute)) {
     die('<div style="color:red;">Rota não encontrada</div>');
 }
 require_once dirname(__FILE__, 2) . '/inc/Response.php';
@@ -24,21 +24,41 @@ class User
     public function __construct(
         private int $id = 0,
         private string $nome = '',
+        private string $email = '',
         private string $tokken = '',
         private bool $is_super_user = false,
         private string $password = '',
         private string $deleted_at = '',
         private bool|null $active = false,
-        private bool|null $inactive = false
+        private bool|null $inactive = false,
+        private bool|int $limit = false,
+        private bool|string $fone_number = '',
+        private bool|string $fone_area_code = '',
+        private bool|string $identification_type = '',
+        private bool|string $identification_number = '',
     ) {
     }
 
-    /**
-     * @return array <p>array with client attributes and their value
-     */
-    public function getUserparameters()
+    public function getAllParameters()
     {
         return get_object_vars($this);
+    }
+
+    /**
+     * @return array <p>array with client attributes and their value not null
+     */
+    public function getParameters()
+    {
+        return  array_filter($this->getAllParameters(), fn ($value) => !empty($value));
+    }
+
+    public function getMatchingParameters(array $array_filter)
+    {
+        $paramenters = $this->getAllParameters();
+
+        $keys = array_intersect($array_filter, array_keys($paramenters));
+
+        return  array_filter($paramenters, fn ($value, $key) => in_array($key, $keys), ARRAY_FILTER_USE_BOTH);
     }
 
     public function getParameter($parameter)
@@ -51,11 +71,11 @@ class User
 
     public function setParameter($parameter, $value)
     {
-        if (!isset($this->{$parameter})) {
+        if (!isset($this->{$parameter}) || empty($value)) {
             return;
         }
 
-        $this->$parameter = $value;
+        $this->$parameter = trim($value);
     }
 
     /**
@@ -64,7 +84,7 @@ class User
      */
     public function checkUserExists(): bool
     {
-        $clientParametersToValidation = $this->getUserparameters();
+        $clientParametersToValidation = $this->getparameters();
         $queryBase = 'select id from authentication';
         $isUniqueInputs = [
             'nome' => ['param' => 'nome = :nome', 'operator' => ' or ', 'exclusive' => true],
@@ -90,7 +110,7 @@ class User
         // change for superuser
         $this->setParameter('is_super_user', true);
 
-        $clientParametersToValidation = $this->getUserparameters();
+        $clientParametersToValidation = $this->getparameters();
         $queryBase = 'select id from authentication';
         $isUniqueInputs = [
             'is_super_user' => ['param' => 'is_super_user is true', 'operator' => ' and ', 'exclusive' => false],
@@ -123,12 +143,12 @@ class User
         }
 
         unset($user[0]['passwd']);
-        return $this->response($user, 'User ok');
+        return $this->responseSuccess($user, 'User ok');
     }
 
     public function get_users()
     {
-        $filters = $this->getUserparameters();
+        $filters = $this->getparameters();
         $queryBase = 'select id, nome,tokken, created_at as criado, deleted_at as removido from authentication';
         $accepted_filters = [
             'id' => ['param' => 'id = :id', 'operator' => ' and ', 'exclusive' => false],
@@ -136,22 +156,71 @@ class User
             'deleted_at' => ['param' => 'deleted_at = :deleted_at', 'operator' => ' and ', 'exclusive' => false],
             'active' => ['param' => 'deleted_at is null', 'operator' => ' and ', 'exclusive' => false],
             'inactive' => ['param' => 'deleted_at is not null', 'operator' => ' and ', 'exclusive' => false],
+            'limit' => ['param' => 'ORDER BY id LIMIT :limit', 'operator' => ' and ', 'exclusive' => false],
         ];
 
         $conection = new database();
-        [$query,$filter_query] = $this->setQueryFilterSelect($queryBase, $filters, $accepted_filters);
-        $users = $conection->EXE_QUERY($query, $filter_query);
 
-        return $this->response($users, 'Usuários ok');
+        [$filter_query,$queryParameters] = self::setQueryFilterSelect($filters, $accepted_filters);
+        $query = $queryBase;
+
+        if (!empty($filter_query)) {
+            $query = $queryBase . 'where' . $filter_query;
+        }
+
+        $users = $conection->EXE_QUERY($query, $queryParameters);
+
+        return $this->responseSuccess($users, 'Usuários ok');
+    }
+
+    public function search_user()
+    {
+        $filters = $this->getparameters();
+        $queryBase = 'select id, nome,tokken, email, created_at as criado, deleted_at, identification_type, identification_number,fone_number, fone_area_code from authentication';
+        $accepted_filters = [
+            'id' => ['param' => 'id = :id', 'operator' => ' and ', 'exclusive' => false],
+            'nome' => ['param' => 'nome = :nome', 'operator' => ' and ', 'exclusive' => false],
+            'tokken' => ['param' => 'tokken = :tokken', 'operator' => ' and ', 'exclusive' => false],
+            'email' => ['param' => 'email = :email', 'operator' => ' and ', 'exclusive' => false],
+            'deleted_at' => ['param' => 'deleted_at = :deleted_at', 'operator' => ' and ', 'exclusive' => false],
+            'active' => ['param' => 'deleted_at is null', 'operator' => ' and ', 'exclusive' => false],
+            'inactive' => ['param' => 'deleted_at is not null', 'operator' => ' and ', 'exclusive' => false],
+        ];
+
+        $conection = new database();
+
+        [$filter_query,$queryParameters] = self::setQueryFilterSelect($filters, $accepted_filters);
+        $query = $queryBase;
+
+        if (!empty($filter_query)) {
+            $query = $queryBase . ' where ' . $filter_query;
+        }
+
+        if ($this->getParameter('limit')) {
+            $query .= ' ORDER BY id LIMIT 1';
+        }
+
+        $user = $conection->EXE_QUERY($query, $queryParameters);
+
+        if (count($user) > 0) {
+            //set new parameters
+            foreach ($user[0] as $usKey => $usValue) {
+                $this->setParameter($usKey, $usValue);
+            };
+        }
+
+        return $this->responseSuccess($user, 'Usuários ok');
     }
 
     public function create_user()
     {
-        $inputsRequired = ['nome' => ['min_4'], 'tokken' => ['min_32'], 'password' => ['min_32']];
-        $query = 'insert into authentication (nome, tokken, passwd, created_at, updated_at) values(:nome, :tokken, :password, now(), now())';
+        $inputsRequired = ['nome' => ['min_4'], 'tokken' => ['min_32'], 'password' => ['min_32'], 'email' => ['email'], 'fone_area_code' => [], 'fone_number' => [], 'identification_type' => [], 'identification_number' => []];
+        $query = 'insert into authentication 
+                (nome, email, fone_area_code, fone_number, identification_type, identification_number, tokken, passwd, created_at, updated_at)
+                values(:nome, :email,:fone_area_code,:fone_number,:identification_type,:identification_number, :tokken, :password, now(), now())';
 
         //checks that the parameters are set
-        $params_data = self::issetParamasValidation($inputsRequired, $this->getUserparameters());
+        $params_data = self::issetParamasValidation($inputsRequired, $this->getparameters());
 
         if (!$params_data['valid']) {
             return $this->responseError('existem parâmetros inválidos', $params_data['erros']);
@@ -164,7 +233,7 @@ class User
         $connection = new database();
         $result = $connection->EXE_NON_QUERY($query, $paramsToQuery);
 
-        return $this->response($result, 'inserction success');
+        return $this->responseSuccess($result, 'inserction success');
     }
 
     public function updateUser()
@@ -178,7 +247,7 @@ class User
         }
 
         //checks that the parameters are set
-        $params_data = self::issetParamasValidation($inputsRequired, $this->getUserparameters());
+        $params_data = self::issetParamasValidation($inputsRequired, $this->getparameters());
 
         if (!$params_data['valid']) {
             return $this->responseError('existem parâmetros inválidos', $params_data['erros']);
@@ -189,14 +258,14 @@ class User
         $connection = new database();
         $result = $connection->EXE_NON_QUERY($query, $paramsToQuery);
 
-        return $this->response($result, 'update success');
+        return $this->responseSuccess($result, 'update success');
     }
 
     public function activeUser()
     {
         $inputsRequired = ['id' => ['int']];
         //checks that the parameters are set
-        $params_data = $this->issetParamasValidation($inputsRequired, $this->getUserparameters());
+        $params_data = $this->issetParamasValidation($inputsRequired, $this->getparameters());
         $params_data['data']['inactive'] = true;
         $params_data['data']['is_super_user'] = true;
 
@@ -224,7 +293,7 @@ class User
         $connection = new database();
         $result = $connection->EXE_NON_QUERY($query, $paramsToQuery);
 
-        return $this->response($result, 'remove success');
+        return $this->responseSuccess($result, 'remove success');
     }
 
     public function destroy_user()
@@ -237,7 +306,7 @@ class User
         //inputs required
         $params = ['id' => ['int']];
         //checks that the parameters are set
-        $params_data = $this->issetParamasValidation($params, $this->getUserparameters());
+        $params_data = $this->issetParamasValidation($params, $this->getparameters());
         $params_data['data']['active'] = true;
         $params_data['data']['is_super_user'] = true;
 
@@ -270,6 +339,6 @@ class User
             return $this->responseError('houve um erro inesperado');
         }
 
-        return $this->response($result, 'remove success');
+        return $this->responseSuccess($result, 'remove success');
     }
 }

@@ -21,3 +21,43 @@ table tr {
 table th { 
     padding: 10px;
 }
+
+.button-custom-yellow{
+    color: #a92d2de3;
+    padding: 5px 20px;
+    background-color: #ffff43;
+    border: 0.5px solid #9d210a;
+    font-weight: bolder;
+    border-radius: 5px;
+    margin: 0;
+}
+
+#content-search-user{
+    display: flex;
+    gap: 50px;
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+#user-data{
+    flex: 3;
+    border-left: 1px solid #967b7b6b;
+    border-top: 1px solid #967b7b6b;
+    background-color: #ff00000d;
+}
+
+
+#user-data div {
+    margin-bottom: 20px;
+}
+
+.status-user #signal-green{
+    width: 15px;
+    min-height: 15px;
+    display: inline-block;
+    background-color: #00800091;
+    border-radius: 20px;
+    margin: 0px 5px;
+    position: relative;
+    top: 2px;
+}

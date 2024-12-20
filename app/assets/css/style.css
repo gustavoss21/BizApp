@@ -62,3 +62,27 @@ a{
 #drop-user:hover{
     display: block;
 }
+
+.content-store{
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-around;
+    gap: 10px;
+}
+
+.product-item{
+    padding: 15px;
+}
+
+.btn-buy{
+    padding: 5px 10px;
+    background-color: #eaea34;
+    color: black;
+    border-radius: 5px;
+    margin: 10px 5px 0 0;
+}
+
+.cart{
+    background-color: transparent;
+}

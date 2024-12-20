@@ -1,4 +1,7 @@
 <?php
+
+use Composer\Pcre\Regex;
+
 $allowedRoute = true;
 
 require_once '../inc/config.php';
@@ -12,15 +15,25 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     header('Location: create.php/');
 }
 
-$response = api_request($endpoint, 'POST', $_POST);
-// printDebug($response,true);
+$json = file_get_contents('php://input');
+$type = get_debug_type($json);
+$data = json_decode($json,true);
+// $data = json_decode($json, true);
+
+$response = api_request($endpoint, 'POST', $data);
+$data = [];
+
 if ($response->status == 'ERROR') {
-    $_SESSION['message'] = ['msg' => $response->message, 'color' => 'red'];
-    $_SESSION['input_error'] = $response->input_error;
-    $_SESSION['input_values'] = $_POST;
-    header('location: create.php');
+    $data['message'] = ['msg' => $response->message, 'color' => 'red'];
+    $data['input_error'] = $response->input_error;
+    $data['status'] = 'error';
+    echo json_encode($data);
     die;
 }
 
-$_SESSION['message'] = ['msg' => 'Usuário Criado com sucesso', 'color' => 'green'];
-header('location: ../index.php');
+$data['message'] = ['msg' => 'Usuário Criado com sucesso', 'color' => 'green'];
+$data['status'] = 'success';
+$data['data'] = $response->data;
+echo json_encode($data);
+die;
+

@@ -14,7 +14,7 @@ trait Response
         return $error;
     }
 
-    public static function response($data, $message, array $input_error = [])
+    public static function responseSuccess($data, $message, array $input_error = [])
     {
         return ['data' => $data, 'message' => $message, 'input_error' => $input_error, 'error' => false];
     }

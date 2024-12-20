@@ -58,7 +58,7 @@ class Product
             return;
         }
 
-        $this->$parameter = $value;
+        $this->$parameter = trim($value);
     }
 
     /**
@@ -97,12 +97,18 @@ class Product
         ];
 
         $productParameters = $this->get_product_parameters();
-        [$query,$filter_query] = $this->setQueryFilterSelect($queryBase, $productParameters, $accepted_filters);
+
+        [$filter_query,$queryParameters] = self::setQueryFilterSelect($productParameters, $accepted_filters);
+        $query = $queryBase;
+        
+        if(!empty($filter_query)){
+            $query = $queryBase . 'where' . $filter_query;
+        }
 
         $conection = new database();
-        $produto = $conection->EXE_QUERY($query, $filter_query);
+        $produto = $conection->EXE_QUERY($query, $queryParameters);
 
-        return $this->response($produto, 'product ok');
+        return $this->responseSuccess($produto, 'product ok');
     }
 
     public function get_products_all()
@@ -112,15 +118,21 @@ class Product
         $accepted_filters = [
             'quantidade' => ['param' => 'quantidade = :quantidade', 'operator' => '', 'exclusive' => false],
         ];
-        [$query,$filter_query] = $this->setQueryFilterSelect($queryBase, $productParameters, $accepted_filters);
+
+        [$filter_query,$queryParameters] = self::setQueryFilterSelect($productParameters, $accepted_filters);
+        $query = $queryBase;
+        
+        if(!empty($filter_query)){
+            $query = $queryBase . 'where' . $filter_query;
+        }
 
         $conection = new database();
-        $produto = $conection->EXE_QUERY($query, $filter_query);
+        $produto = $conection->EXE_QUERY($query, $queryParameters);
 
         if ($produto) {
             $this->responseError('produto não encontrado');
         }
-        return $this->response($produto, 'product ok');
+        return $this->responseSuccess($produto, 'product ok');
     }
 
     public function create_product()
@@ -153,7 +165,7 @@ class Product
             return $this->responseError('hove um error inesperado');
         }
 
-        return $this->response($result, 'inserction success');
+        return $this->responseSuccess($result, 'inserction success');
     }
 
     public function update_product()
@@ -190,7 +202,7 @@ class Product
             return $this->responseError('hove um error inesperado');
         }
 
-        return $this->response($result, 'inserction success');
+        return $this->responseSuccess($result, 'inserction success');
     }
 
     public function destroy_product()
@@ -219,6 +231,6 @@ class Product
         $connection = new database();
         $result = $connection->EXE_NON_QUERY($queryDestruction, $paramsToQuery);
 
-        return $this->response($$result, 'remove success');
+        return $this->responseSuccess($$result, 'remove success');
     }
 }

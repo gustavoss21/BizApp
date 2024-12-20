@@ -3,14 +3,11 @@ if(!isset($allowedRoute)){
     die('<div style="color:red;">Rota não encontrada</div>');
 }
 
-function api_request($endpoint, $method = 'GET', $user, $variables = [], $debug = false)
+function api_request($endpoint, $method = 'GET', $variables = [], $debug = false)
 {
-    $cred = base64_decode("{$user['tokken']}:{$user['password']}");
 
     $headers = [
-        'Authorization: Basic ' . $cred
     ];
-    // return $cred;
 
     $client = curl_init();
     curl_setopt($client, CURLOPT_HTTPHEADER, $headers);
@@ -98,7 +95,7 @@ function is_request_error($request)
 {
     $body = '';
     $message = [];
-
+    $allowedRoute = true;
     $request = (object) $request;
 
     if (!isset($request->data) || $request->status == 'ERROR') {

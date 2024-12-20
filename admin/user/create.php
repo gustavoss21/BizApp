@@ -1,51 +1,42 @@
 <?php
+
 $allowedRoute = true;
 
 require_once '../inc/config.php';
 require_once '../inc/api_functions.php';
+require_once '../parciais/form.php';
 
 session_start();
 
 $message = '';
-$endpoint = 'superAuthorizationRequired';
-$response = api_request($endpoint,'GET');
-// printDebug($response, true);
-if ($response->status == 'ERROR') {
-    $_SESSION['message'] = ['msg' => $response->message, 'color' => 'red'];
-    $_SESSION['input_error'] = $response->input_error;
-    $_SESSION['input_values'] = $_POST;
-    header('location: ../auth/login.php');
-    exit;
-}
 
 $submit_uri = '/projeto_api/admin/user/store.php';
+$formMethod = 'POST';
 
 $message = isset($_SESSION['message']) ? $_SESSION['message'] : [];
-unset($_SESSION['message']);
-
 $input_error = isset($_SESSION['input_error']) ? $_SESSION['input_error'] : [];
-unset($_SESSION['input_error']);
-
 $input_values = isset($_SESSION['input_values']) ? $_SESSION['input_values'] : [];
-unset($_SESSION['input_values']);
 
-$char_token = 'AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz123456789';
+unset($_SESSION['message'], $_SESSION['input_error'], $_SESSION['input_values']);
 
-$palavraAleatoria = fn ($caracteres, $tamanho) => substr(str_shuffle($caracteres), 0, $tamanho);
-
-$data = [
-    'uri' => $submit_uri,
-    'inputs' => [
-        'nome' => ['identifier' => 'nome', 'label' => 'nome', 'type' => 'text', 'value' => $input_values['nome'] ?? '', 'text_error' => $input_error->nome ?? '', 'other_params' => 'required'],
-        'tokken' => ['identifier' => 'tokken', 'label' => 'tokken | username', 'type' => 'text', 'value' => $palavraAleatoria($char_token, 32), 'text_error' => $input_error->tokken ?? '', 'other_params' => 'readonly required'],
-        'password' => ['identifier' => 'password', 'label' => 'senha', 'type' => 'text', 'value' => $palavraAleatoria($char_token, 32), 'text_error' => $input_error->password ?? '', 'other_params' => 'readonly required'],
-    ],
-    'elements' => [
-        'btn-submit' => ['identifier' => 'submit-form', 'class' => 'input-submit input-element', 'tag_type' => 'button', 'label' => 'Criar', 'action' => 'type="submit"'],
-        'btn-back' => ['identifier' => 'btn-back', 'tag_type' => 'a', 'class' => 'element-back', 'label' => 'Voltar', 'action' => 'href="../"'],
-    ]];
 $title = 'Usuário';
 $subtitle = 'novo Usuário';
-$body = require '../parciais/form.php';
+$idForm = 'creatUseForm';
+
+$form = new SetForm($subtitle,"action='$submit_uri' id='$idForm'",$input_error);
+$form->setElement('input',['class'=>'input-element','name'=>'nome', 'id'=>'nome','type'=>'text','value'=>$input_values['name'] ?? ''],'nome');
+$form->setElement('input',['class'=>'input-element','name'=>'email', 'id'=>'email','type'=>'email','value'=>$input_values['email'] ?? ''],'email');
+$form->setElement('input',['class'=>'input-element','name'=>'fone_number', 'id'=>'fone_number','type'=>'text','value'=>$input_values['fone_number'] ?? ''],'DDD + telefone');
+$form->setElement('input',['class'=>'input-element','name'=>'tokken', 'id'=>'tokken','type'=>'text','value'=>$input_values['tokken'] ?? ''],'tokken',['readonly']);
+$form->setElement('input',['class'=>'input-element','name'=>'password', 'id'=>'password','type'=>'password','value'=>$input_values['password'] ?? ''],'password',['readonly']);
+
+$identificationType = $form->buildElement('input',['class'=>'identification_type radio','name'=>'identification_type', 'type'=>'radio','value'=>'CPF'],'CPF',['checked']);
+$identificationType .= $form->buildElement('input',['class'=>'identification_type radio','name'=>'identification_type', 'id'=>'radio-cnpj','type'=>'radio','value'=>'CNPJ'],'CNPJ');
+$form->setElement('input',['class'=>'identification_number input-element','name'=>'identification_number','type'=>'text'],$identificationType);
+
+$form->setElement('button',['id'=>'submit-form','class' => 'input-submit input-element','type'=>'submit'],'Criar');
+$form->setElement('a',['id'=>'btn-back','class'=>'element-back','type'=>'text','href'=>'../'],'Voltar');
+
+$body = $form->buildForm();
 
 require '../layout.php';

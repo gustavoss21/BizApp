@@ -2,7 +2,7 @@
 
 namespace Api;
 
-if(!isset($allowedRoute)){
+if (!isset($allowedRoute)) {
     die('<div style="color:red;">Rota não encontrada</div>');
 }
 
@@ -12,14 +12,18 @@ require_once 'inc/route_base.php';
 require_once 'action_route/User.php';
 require_once 'action_route/Cliente.php';
 require_once 'action_route/Product.php';
+require_once 'action_route/Payment.php';
+require_once 'action_route/Price.php';
 
 use Api\inc\Filter;
 use Api\inc\Response;
 use Api\action_route\Cliente;
 use Api\action_route\Product;
+use Api\action_route\Payment;
 use Api\action_route\User;
+use Api\action_route\Price;
 use Api\inc\RouteBase;
-
+use Exception;
 
 class ApiRoute extends RouteBase
 {
@@ -47,7 +51,6 @@ class ApiRoute extends RouteBase
                 'postRequiredMethod'
             ],
             'get_products' => [
-                // 'superAuthorizationRequired',
                 'autheticationRequired',
                 'getRequiredMethod'
             ],
@@ -69,14 +72,18 @@ class ApiRoute extends RouteBase
 
             'getUsers' => [
                 'superAuthorizationRequired',
+                // 'authorizationOnlyOne',
                 'getRequiredMethod'
             ],
+            'getOneUser' => [
+                'postRequiredMethod'
+            ],
             'createUser' => [
-                'superAuthorizationRequired',
+                // 'superAuthorizationRequired',
                 'postRequiredMethod'
             ],
             'updateUser' => [
-                'superAuthorizationRequired', 
+                'superAuthorizationRequired',
                 'postRequiredMethod'
             ],
             'destroyUser' => [
@@ -87,7 +94,115 @@ class ApiRoute extends RouteBase
         ];
     }
 
+    public function createPreference()
+    {
+        //get client parameters
+        $paramsToFilterQuery = $this->params['filter'] ?? '';
+        $clients_parameters = $this->getFilter($paramsToFilterQuery);
+
+        //get payment
+        $payment = new Payment();
+        $payment->setParameter('id', $clients_parameters['id_payment']);
+        $paymentStatus = $payment->getPaymentByID();
+
+        //get price
+        $price = new Price($payment->getParameter('transaction_amount_id'));
+        $price->getPrice();
+
+
+        if (empty($paymentStatus['data'])) {
+            return $this->responseError('payment not found');
+        }
+
+        //get user
+        $user = new User(id:$payment->getParameter('id_customer'));
+        $user->search_user();
+
+        $paymentData = $paymentStatus['data'][0];
+        
+        if($paymentData['status'] === 'approved'){
+            $userReponse = $user->getMatchingParameters(['nome','email','identification_type','identification_number']);
+
+            $responseData =  [
+                'status_payment'=>'approved',
+                'id_external_payment'=>$paymentData['id_external'],
+                'preference_id'=>'',
+                'user'=>$userReponse
+            ];
+
+            return $this->responseSuccess($responseData, 'payment already exists');
+
+        }
+
+        $status = $payment->createPreference($user);
+        $status['amount'] =  $price->getParameter('price');
+
+        return $this->responseSuccess($status, 'preference ok');
+    }
+
     //routes api
+    protected function process_payment()
+    {
+        $user = new User();
+        $user_email = $this->params['payer']['email'];
+        $user->setParameter('email', $user_email);
+        $user->setParameter('limit', 1);
+        $user->search_user();
+
+        //set client parameters
+        $Payment = new Payment();
+        self::setClassParameters($Payment, $this->params);
+
+        if(! $user->getParameter('id')){
+            return $this->responseError('houve um error inesperado no pagamento, verifique os dados do usuário');
+
+        }
+        
+        $Payment->setParameter('id_customer', $user->getParameter('id'));
+
+        $Payment->getPaymentUser();
+
+        //get price
+        $price = new Price($Payment->getParameter('transaction_amount_id'));
+        $price->getPrice();
+
+        if($price->getParameter('price') !== $Payment->getParameter('transaction_amount')){
+            return $this->responseError('houve um error inesperado no pagamento');
+        }
+
+        try {
+            $status = $Payment->send($user->getparameters());
+        } catch (Exception $error) {
+            return $this->responseError('Houve um erro inesperado, status do error: ' . $error);
+        }
+
+        //defines updated payment
+        $Payment->setParameter('id_customer', $user->getParameter('id'));
+        $Payment->setParameter('issuer_id', '');
+        $Payment->setParameter('transaction_amount', '');
+        $Payment->setParameter('id_external', $status->id);
+        $Payment->setParameter('status', $status->status);
+        $Payment->setParameter('updated_at', $status->date_last_updated);
+        $Payment->setParameter('date_approved', $status->date_approved);
+        $Payment->setParameter('card_last_fourt_digits', $status->card->last_four_digits);
+        $Payment->setParameter('card_holder_name', $status->card->cardholder->name);
+        $Payment->setParameter('payment_type_id', $status->payment_type_id);
+        $Payment->setParameter('expire_in', $this->projectionData(30));
+        $Payment->setParameter('id_external', $status->id);
+
+        //update payment
+        $Payment->update();
+
+        $statusPayment = $Payment->getParameter('status');
+
+        if ($statusPayment !== 'approved') {
+            return $this->responseError('pagamento não realizado, status: ' . $statusPayment);
+        }
+
+        $Payment->setParameter('token', '');
+        return $this->responseSuccess($Payment->getParameters(), 'payment ok');
+    }
+
     protected function get_clients()
     {
         //get client parameters
@@ -127,7 +242,7 @@ class ApiRoute extends RouteBase
 
         //avoid duplicate client
         $ClientExist = $cliente->check_client_exists();
-        
+
         if ($ClientExist) {
             return Response::responseError('email or name is already registered');
         };
@@ -141,14 +256,14 @@ class ApiRoute extends RouteBase
         //set client parameters
         $cliente = new Cliente();
         self::setClassParameters($cliente, $this->params);
-        
+
         //avoid removing already removed client
         $ClientExist = $cliente->check_client_exists();
 
         if (!$ClientExist) {
             return Response::responseError('client not fund, try again later');
         };
-        
+
         //destroy client
         return $cliente->destroy_client();
     }
@@ -218,6 +333,35 @@ class ApiRoute extends RouteBase
         return $product->destroy_product();
     }
 
+    protected function getOneUser()
+    {
+        //get user parameters
+        $paramsToFilterQuery = $this->params['filter'] ?? '';
+        $userParameters = $this->getFilter($paramsToFilterQuery);
+
+        //set user parameters
+        $user = new User();
+        self::setClassParameters($user, $userParameters);
+        $user->setParameter('limit', 1);
+
+        //get and return users
+        $userStatus = $user->search_user();
+
+        if (!$userStatus['data']) {
+            return $userStatus;
+        }
+
+        $payment = new Payment(id_customer:$user->getParameter('id'));
+
+        $paymentResult = $payment->getPaymentUser();
+        if (!$paymentResult) {
+            return $this->responseError('user payment not found', [], $user->getparameters());
+        }
+        $userStatus['data'][] = $paymentResult[0];
+
+        return $userStatus;
+    }
+
     protected function getUsers()
     {
         //get user parameters
@@ -236,7 +380,7 @@ class ApiRoute extends RouteBase
     {
         //set user parameters
         $user = new User();
-        self::setClassParameters($user, $this->params);
+        self::setClassParameters($user, $this->params);         
 
         //avoid duplicate user
         $userExists = $user->checkUserExists();
@@ -246,7 +390,36 @@ class ApiRoute extends RouteBase
         };
 
         //create User
-        return $user->create_user();
+        $user_status = $user->create_user();
+
+        if ($user_status['error']) {
+            return $user_status;
+        }
+
+        $user_search = new User();
+        $user_search->setParameter('tokken', $user->getParameter('tokken'));
+
+        $userCreated = ($user_search->search_user())['data'][0];
+
+
+        //get price
+        $price = new Price();
+        $price->getPrice();
+
+        $payment = new Payment(
+            id_customer:$userCreated['id'],
+            transaction_amount_id:$price->getParameter('id')
+        );        
+
+        $payment->create();
+
+        $paymentCreated = $payment->getPaymentUser()[0];
+
+        $user_status['data'] = [];
+        $user_status['data'][] = $userCreated;
+        $user_status['data'][] = $paymentCreated;
+
+        return $user_status;
     }
 
     protected function updateUser()
@@ -260,9 +433,9 @@ class ApiRoute extends RouteBase
         if ($userExist) {
             return $this->responseError('the user is already registed');
         }
-        
+
         $isSuperUser = $user->checkIsSuperUser();
-        if($isSuperUser){
+        if ($isSuperUser) {
             return $this->responseError('it is impossible to change user');
         }
 
@@ -275,7 +448,7 @@ class ApiRoute extends RouteBase
         //set user parameters
         $user = new User();
         self::setClassParameters($user, $this->params);
-        
+
         //avoid removing already removed user
         $usertExist = $user->checkUserExists();
 
@@ -302,8 +475,8 @@ class ApiRoute extends RouteBase
 
         // avoid deactivate super user
         $isSuperUser = $user->checkIsSuperUser();
-        
-        if($isSuperUser){
+
+        if ($isSuperUser) {
             return $this->responseError('it is impossible to change user');
         }
 

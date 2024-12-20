@@ -2,7 +2,7 @@
 
 namespace Api\inc;
 
-if(!isset($allowedRoute)){
+if (!isset($allowedRoute)) {
     die('<div style="color:red;">Rota não encontrada</div>');
 }
 
@@ -17,9 +17,15 @@ trait Validation
      */
     protected static function exist(string $queryBase, array $clientParameters, $accepted_filters)
     {
-        [$query,$queryToParameters] = self::setQueryFilterSelect($queryBase, $clientParameters, $accepted_filters);
+        [$filter_query,$queryParameters] = self::setQueryFilterSelect($clientParameters, $accepted_filters);
+        $query = $queryBase;
+
+        if (!empty($filter_query)) {
+            $query = $queryBase . ' where ' . $filter_query;
+        }
+
         $conection = new database();
-        $result = $conection->EXE_QUERY($query, $queryToParameters);
+        $result = $conection->EXE_QUERY($query, $queryParameters);
 
         return $result;
     }
@@ -31,7 +37,9 @@ trait Validation
         $methods_validation['min_32'] = fn ($nome) => preg_match('/.{32}/', $nome);
         $methods_validation['min'] = fn ($numero) => preg_match('/^\d{11}$/', $numero);
         $methods_validation['int'] = fn ($numero) => preg_match('/^\d+$/', $numero);
+        $methods_validation['not_null'] = fn ($numero) => preg_match('/^.+$/', $numero);
         $methods_validation['email'] = fn ($email) => filter_var($email, FILTER_VALIDATE_EMAIL);
+        $methods_validation['fone'] = fn ($fone) => $this->validarTelefone($fone);
 
         foreach ($parameters as  $param_value) {
             $value_for_validation = $parameter;
@@ -64,5 +72,16 @@ trait Validation
         }
 
         return $validation;
+    }
+
+    public function validarTelefone($telefone)
+    {
+        $regex = '/^\+?(\d{2})?\s?\(?\d{2}\)?\s?\d{4,5}-?\d{4}$/';
+
+        if (preg_match($regex, $telefone)) {
+            return true;
+        } else {
+            return false;
+        }
     }
 }
