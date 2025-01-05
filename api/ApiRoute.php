@@ -109,7 +109,6 @@ class ApiRoute extends RouteBase
         $price = new Price($payment->getParameter('transaction_amount_id'));
         $price->getPrice();
 
-
         if (empty($paymentStatus['data'])) {
             return $this->responseError('payment not found');
         }
@@ -119,23 +118,22 @@ class ApiRoute extends RouteBase
         $user->search_user();
 
         $paymentData = $paymentStatus['data'][0];
-        
-        if($paymentData['status'] === 'approved'){
-            $userReponse = $user->getMatchingParameters(['nome','email','identification_type','identification_number']);
 
-            $responseData =  [
-                'status_payment'=>'approved',
-                'id_external_payment'=>$paymentData['id_external'],
-                'preference_id'=>'',
-                'user'=>$userReponse
+        if ($paymentData['status'] === 'approved') {
+            $userReponse = $user->getMatchingParameters(['nome', 'email', 'identification_type', 'identification_number']);
+
+            $responseData = [
+                'status_payment' => 'approved',
+                'id_external_payment' => $paymentData['id_external'],
+                'preference_id' => '',
+                'user' => $userReponse
             ];
 
             return $this->responseSuccess($responseData, 'payment already exists');
-
         }
 
         $status = $payment->createPreference($user);
-        $status['amount'] =  $price->getParameter('price');
+        $status['amount'] = $price->getParameter('price');
 
         return $this->responseSuccess($status, 'preference ok');
     }
@@ -145,19 +143,20 @@ class ApiRoute extends RouteBase
     {
         $user = new User();
         $user_email = $this->params['payer']['email'];
+        $user_last_name = $this->params['payer']['last_name'] ?? '';
         $user->setParameter('email', $user_email);
         $user->setParameter('limit', 1);
         $user->search_user();
+        $user->setParameter('sobrenome', $user_last_name);
 
         //set client parameters
         $Payment = new Payment();
         self::setClassParameters($Payment, $this->params);
 
-        if(! $user->getParameter('id')){
+        if (!$user->getParameter('id')) {
             return $this->responseError('houve um error inesperado no pagamento, verifique os dados do usuário');
-
         }
-        
+
         $Payment->setParameter('id_customer', $user->getParameter('id'));
 
         $Payment->getPaymentUser();
@@ -166,36 +165,73 @@ class ApiRoute extends RouteBase
         $price = new Price($Payment->getParameter('transaction_amount_id'));
         $price->getPrice();
 
-        if($price->getParameter('price') !== $Payment->getParameter('transaction_amount')){
+        if ($price->getParameter('price') !== $Payment->getParameter('transaction_amount')) {
             return $this->responseError('houve um error inesperado no pagamento');
         }
 
         try {
-            $status = $Payment->send($user->getparameters());
+            if (in_array($Payment->getParameter('payment_method_id'), ['pix', 'bolbradesco'])) {
+                $status = $Payment->generatePayment($user);
+            } else {
+                $status = $Payment->pay($user);
+            }
         } catch (Exception $error) {
             return $this->responseError('Houve um erro inesperado, status do error: ' . $error);
         }
 
         //defines updated payment
+        $Payment->setParametersAfterPaymentByCard($status);
         $Payment->setParameter('id_customer', $user->getParameter('id'));
-        $Payment->setParameter('issuer_id', '');
-        $Payment->setParameter('transaction_amount', '');
-        $Payment->setParameter('id_external', $status->id);
-        $Payment->setParameter('status', $status->status);
-        $Payment->setParameter('updated_at', $status->date_last_updated);
-        $Payment->setParameter('date_approved', $status->date_approved);
-        $Payment->setParameter('card_last_fourt_digits', $status->card->last_four_digits);
-        $Payment->setParameter('card_holder_name', $status->card->cardholder->name);
-        $Payment->setParameter('payment_type_id', $status->payment_type_id);
         $Payment->setParameter('expire_in', $this->projectionData(30));
-        $Payment->setParameter('id_external', $status->id);
 
         //update payment
         $Payment->update();
 
         $statusPayment = $Payment->getParameter('status');
 
-        if ($statusPayment !== 'approved') {
+        if (!in_array($statusPayment, ['approved', 'pending'])) {
+            return $this->responseError('pagamento não realizado, status: ' . $statusPayment);
+        }
+
+        $Payment->setParameter('token', '');
+        return $this->responseSuccess($Payment->getParameters(), 'payment ok');
+    }
+
+    //routes api
+    protected function get_payment_From_api()
+    {
+        if (!$this->params['id']) {
+            return $this->responseError('id do pagamento requisitado');
+        }
+
+        //set client parameters
+        $Payment = new Payment();
+        $Payment->setParameter('id', $this->params['id']);
+
+        $Payment->getPaymentByID();
+
+        try {
+            $status = $Payment->getPaymentFromAPI()['data'];
+        } catch (Exception $error) {
+            return $this->responseError('Houve um erro inesperado, status do error: ' . $error);
+        }
+
+        // //defines updated payment
+        $Payment->setParametersAfterPaymentByCard($status);
+        $Payment->setParameter('expire_in', $this->projectionData(30));
+
+        // //update payment
+        // $Payment->update();
+        //set client parameters
+        $Price = new Price();
+        $Price->getPrice();
+
+        $Payment->setParameter('qr_code', $status->point_of_interaction->transaction_data->qr_code);
+        $Payment->setParameter('qr_code_base64', $status->point_of_interaction->transaction_data->qr_code_base64);
+        $Payment->setParameter('transaction_amount', $Price->getParameter('price'));
+        $statusPayment = $Payment->getParameter('status');
+
+        if (!in_array($statusPayment, ['approved', 'pending'])) {
             return $this->responseError('pagamento não realizado, status: ' . $statusPayment);
         }
 
@@ -380,7 +416,7 @@ class ApiRoute extends RouteBase
     {
         //set user parameters
         $user = new User();
-        self::setClassParameters($user, $this->params);         
+        self::setClassParameters($user, $this->params);
 
         //avoid duplicate user
         $userExists = $user->checkUserExists();
@@ -401,7 +437,6 @@ class ApiRoute extends RouteBase
 
         $userCreated = ($user_search->search_user())['data'][0];
 
-
         //get price
         $price = new Price();
         $price->getPrice();
@@ -409,7 +444,7 @@ class ApiRoute extends RouteBase
         $payment = new Payment(
             id_customer:$userCreated['id'],
             transaction_amount_id:$price->getParameter('id')
-        );        
+        );
 
         $payment->create();
 

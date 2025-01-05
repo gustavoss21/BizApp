@@ -7,7 +7,10 @@ require_once dirname(__DIR__, 1) . '/inc/Response.php';
 require_once dirname(__FILE__, 2) . '/inc/Validation.php';
 require_once dirname(__FILE__, 2) . '/inc/database.php';
 require_once dirname(__FILE__, 2) . '/inc/Filter.php';
+require_once 'User.php';
+
 // require_once dirname(__DIR__, 1) . '/inc/preference.php';
+use Api\action_route\User;
 
 use MercadoPago\SDK;
 use MercadoPago\Item;
@@ -56,6 +59,8 @@ class Payment
         private $card_holder_name = '',
         private $date_approved = '',
         private $card_last_fourt_digits = 0000,
+        private $qr_code = '',
+        private $qr_code_base64 = ''
     ) {
     }
 
@@ -89,7 +94,31 @@ class Payment
         $this->$parameter = trim($value);
     }
 
-    public function send($payer)
+    public function setParametersAfterPaymentByCard($status){
+        $this->setParameter('transaction_amount', '');
+        $this->setParameter('id_external', $status->id);
+        $this->setParameter('status', $status->status);
+        $this->setParameter('updated_at', $status->date_last_updated);
+        $this->setParameter('issuer_id', '');
+        $this->setParameter('date_approved', $status->date_approved);
+        $this->setParameter('card_last_fourt_digits', $status->card->last_four_digits ?? 0);
+        $this->setParameter('card_holder_name', $status->card->cardholder->name ?? '');
+        $this->setParameter('payment_type_id', $status->payment_type_id);
+        $this->setParameter('id_external', $status->id);
+    }
+
+    public function setParametersAfterPaymentByPix($status){
+        $this->setParameter('transaction_amount', '');
+        $this->setParameter('id_external', $status->id);
+        $this->setParameter('status', $status->status);
+        $this->setParameter('updated_at', $status->date_last_updated);
+        $this->setParameter('issuer_id', '');
+        $this->setParameter('date_approved', $status->date_approved);
+        $this->setParameter('payment_type_id', $status->payment_type_id);
+        $this->setParameter('id_external', $status->id);
+    }
+
+    public function pay(User $payer)
     {
         MercadoPagoConfig::setAccessToken('TEST-3222839361900551-102509-50961e3e4139d32dea7720c15620524e-1446778296');
         $client = new PaymentClient();
@@ -103,10 +132,10 @@ class Payment
             'payment_method_id' => $this->getParameter('payment_method_id'),
             'issuer_id' => $this->getParameter('issuer_id'),
             'payer' => [
-                'email' => $payer['email'],
+                'email' => $payer->getParameter('email'),
                 'identification' => [
-                    'type' => $payer['identification_type'],
-                    'number' => $payer['identification_number']
+                    'type' => $payer->getParameter('identification_type'),
+                    'number' => $payer->getParameter('identification_number')
                 ]
             ]
         ];
@@ -114,6 +143,58 @@ class Payment
         $payment = $client->create($data_pay, $request_options);
 
         return $payment;
+    }
+
+    public function generatePayment(User $payer){
+        MercadoPagoConfig::setAccessToken('TEST-3222839361900551-102509-50961e3e4139d32dea7720c15620524e-1446778296');
+        $client = new PaymentClient();
+        $request_options = new RequestOptions();
+
+        $createRequest = [
+            // "installments"=>1,
+            "additional_info"=> [
+                "items"=> [
+                [
+                    "id"=>$payer->getParameter('id'),
+                    "title"=> 'usuário '. $payer->getParameter('id'),
+                    "description"=> "buy user for api access",
+                    "picture_url"=> "https://http2.mlstatic.com/resources/frontend/statics/growth-sellers-landings/device-mlb-point-i_medium2x.png",
+                    "category_id"=> "electronics",
+                    "quantity"=> 1,
+                    "unit_price"=> $this->getParameter('transaction_amount'),
+                    "type"=> "electronics",
+                ]
+                ],
+                "payer"=> [
+                    "first_name"=> $payer->getParameter('nome'),
+                    "last_name"=> "indefinido",
+                    "phone"=> [
+                        "area_code"=> $payer->getParameter('fone_area_code'),
+                        "number"=> $payer->getParameter('fone_number')
+                    ]
+                ]
+            ],
+            "binary_mode" => false,
+            "description" => "get qrcode for paymen",
+            "external_reference" => $this->getParameter('id'),
+            "payer" => [
+                "entity_type" => "individual",
+                "type" => "customer",
+                "first_name"=> $payer->getParameter('nome'),
+                "last_name"=> $payer->getParameter('sobrenome'),
+                "email" => $payer->getParameter('email'),
+                "identification" => [
+                    "type" => $payer->getParameter('identification_type'),
+                    "number" => $payer->getParameter('identification_number')
+                ]
+            ],
+            "callback_url"=>"http://127.0.0.1/projeto_api/admin/checkout/pix.php",
+            "payment_method_id" => $this->getParameter('payment_method_id'),
+            "transaction_amount" => (float) $this->getParameter('transaction_amount'),
+        ];
+
+        $response = $client->create($createRequest, $request_options);
+        return $response;
     }
 
     public function createPreference($user)
@@ -229,6 +310,16 @@ class Payment
                 $this->setParameter($payKey, $payValue);
             };
         }
+
+        return $this->responseSuccess($payment, 'seach payment');
+    }
+
+    public function getPaymentFromAPI()
+    {
+        MercadoPagoConfig::setAccessToken('TEST-3222839361900551-102509-50961e3e4139d32dea7720c15620524e-1446778296');        
+        $client = new PaymentClient();
+        $id_payment = $this->getParameter('id_external');
+        $payment = $client->get($id_payment);
 
         return $this->responseSuccess($payment, 'seach payment');
     }

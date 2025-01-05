@@ -17,45 +17,49 @@
             return obj;
         }
 
-        const mp = new MercadoPago('TEST-1216d8bc-8295-4cd8-85fc-31e086398a99', { // Add your public key credential
-          locale: 'pt'
-        });
-        const bricksBuilder = mp.bricks();
-        let {id,id_payment,user} = arrToobj(location.search)
-        let data = {
-            initialization: {
-              paymentId: id, // Payment identifier, from which the status will be checked
-            },
-            customization: {
-              visual: {
-                hideStatusDetails: true,
-                hideTransactionDate: true,
-                style: {
-                  theme: 'default', // 'default' | 'dark' | 'bootstrap' | 'flat'
+        function statusPayment(){
+          const mp = new MercadoPago('TEST-1216d8bc-8295-4cd8-85fc-31e086398a99', { // Add your public key credential
+            locale: 'pt'
+          });
+          const bricksBuilder = mp.bricks();
+          let {id,id_payment,user} = arrToobj(location.search)
+          let data = {
+              initialization: {
+                paymentId: id, // Payment identifier, from which the status will be checked
+              },
+              customization: {
+                visual: {
+                  hideStatusDetails: true,
+                  hideTransactionDate: true,
+                  style: {
+                    theme: 'default', // 'default' | 'dark' | 'bootstrap' | 'flat'
+                  }
+                },
+                backUrls: {
+                  'error': 'http://127.0.0.1/projeto_api/admin/checkout/index.php?id_payment='+id_payment,
+                  'return': 'http://127.0.0.1/projeto_api/admin/user/status.php?nome='+user
                 }
               },
-              backUrls: {
-                'error': 'http://127.0.0.1/projeto_api/admin/checkout/index.php?id_payment='+id_payment,
-                'return': 'http://127.0.0.1/projeto_api/admin/user/status.php?nome='+user
-              }
-            },
-            callbacks: {
-              onReady: () => {
-                // Callback called when Brick is ready
-                console.log('tudo certo')
+              callbacks: {
+                onReady: () => {
+                  // Callback called when Brick is ready
+                  console.log(Object.keys)
 
+                },
+                onError: (error) => {
+                  console.error(error)
+                  // Callback called for all Brick error cases
+                },
               },
-              onError: (error) => {
-                console.error(error)
-                // Callback called for all Brick error cases
-              },
-            },
+            };
+          const renderStatusScreenBrick = async (bricksBuilder) => {
+            const settings = data
+            window.statusScreenBrickController = await bricksBuilder.create('statusScreen', 'statusScreenBrick_container', settings);
           };
-        const renderStatusScreenBrick = async (bricksBuilder) => {
-          const settings = data
-          window.statusScreenBrickController = await bricksBuilder.create('statusScreen', 'statusScreenBrick_container', settings);
-        };
-        renderStatusScreenBrick(bricksBuilder);
+          renderStatusScreenBrick(bricksBuilder);
+        }
+
+        statusPayment()
       </script>
     </body>
     </html>

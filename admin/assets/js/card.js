@@ -137,13 +137,43 @@ function sendPayment(formData){
 
         let id_external = response.data.id_external
         let id_payment = location.search
+        
+        if(response.data.payment_method_id == 'pix'){
+          location.href = '/projeto_api/admin/checkout/pix.php'+id_payment+'&id='+id_external+'&user='+user['user_full_name']
+          return;
+        }
+
         location.href = '/projeto_api/admin/checkout/status.php'+id_payment+'&id='+id_external+'&user='+user['user_full_name']
+        return;
       }
       console.log(response);
-      return response.data
+
+      throw 'hove um error inesperado'
+    
     })
+
     .catch((error) => {
       // lidar com a resposta de erro ao tentar criar o pagamento
       console.error(error);
+      let message = document.querySelector('#message')
+
+      message.innerHTML = error
+      message.style.color = 'red'
+      message.style.marginTop = '15px'
+      message.style.textAlign = 'center'
+
+      let arrayError = response.input_error
+
+      Object.keys(arrayError).forEach((value,key)=>{
+          let seletor = '#error-'+value
+          console.log(seletor)
+          let input = document.querySelector(seletor)
+          if(input){
+              input.setAttribute('class','error-active')
+              input.innerHTML = arrayError[value];
+          }
+      })
+
     });
-}
+    // if("payment_type_id": "bank_transfer")
+    }

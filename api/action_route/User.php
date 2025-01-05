@@ -24,6 +24,7 @@ class User
     public function __construct(
         private int $id = 0,
         private string $nome = '',
+        private string $sobrenome = '',
         private string $email = '',
         private string $tokken = '',
         private bool $is_super_user = false,

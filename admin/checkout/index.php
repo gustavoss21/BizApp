@@ -10,6 +10,8 @@
     <link rel="stylesheet" href="/projeto_api/app/assets/css/style_form.css">
 </head>
 <body>
+    <p id="message"></p>
+
   
     <div id="statusScreenBrick_container"></div>
 
