@@ -13,7 +13,7 @@ const options = {
   },
 };
 
-fetch('http://127.0.0.1/projeto_api/api/?endpoint=createPreference&filter='+data, options)
+fetch('http://127.0.0.1/projeto_api/api/?endpoint=create-preference&filter='+data, options)
   .then(response => response.json())
   .then(response => {
     

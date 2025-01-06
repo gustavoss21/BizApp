@@ -19,7 +19,7 @@ if ($response->status == 'ERROR') {
 }
 // printDebug($response, true);
 
-$endpoint = 'getUsers';
+$endpoint = 'get-users';
 
 if (!isset($_GET['id'])) {
     header('Location: index.php/');

@@ -7,11 +7,11 @@ require_once '../inc/api_functions.php';
 session_start();
 
 $message = '';
-$endpoint = 'superAuthorizationRequired';
+$endpoint = 'has-super-authorization';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    $_SESSION['message'] = ['msg' => ['Metodo não permitido!'], 'color' => 'green', 'type' => 'ERROR'];
-    header('Location: create.php/');
+    $_SESSION['message'] = ['msg' => ['Metodo não permitido!'], 'color' => 'red', 'type' => 'ERROR'];
+    header('Location: login.php/');
     exit;
 }
 

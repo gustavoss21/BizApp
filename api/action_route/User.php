@@ -89,6 +89,7 @@ class User
         $queryBase = 'select id from authentication';
         $isUniqueInputs = [
             'nome' => ['param' => 'nome = :nome', 'operator' => ' or ', 'exclusive' => true],
+            'email' => ['param' => 'email = :email', 'operator' => ' or ', 'exclusive' => true],
             'tokken' => ['param' => 'tokken = :tokken', 'operator' => ' and ', 'exclusive' => true],
             'active' => ['param' => 'deleted_at is null', 'operator' => ' and ', 'exclusive' => false],
             'id' => ['param' => 'id <> :id', 'operator' => ' and ', 'exclusive' => false]
@@ -237,7 +238,7 @@ class User
         return $this->responseSuccess($result, 'inserction success');
     }
 
-    public function updateUser()
+    public function update_user()
     {
         $inputsRequired = ['id' => ['int'], 'nome' => ['min_4']];
         $query = 'update authentication set nome = :nome where id = :id';

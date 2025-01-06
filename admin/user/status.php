@@ -62,7 +62,7 @@ if (empty($filters['filter'])) {
     exit;
 }
 
-$endpoint = 'getOneUser';
+$endpoint = 'get-one-user';
 
 $response = api_request($endpoint, 'POST', $filters);
 

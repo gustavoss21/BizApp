@@ -30,7 +30,7 @@
 
         function paymentPix(){
           let {id,id_payment,user} = arrToobj(location.search)
-          let url = location.origin +'/projeto_api/api/index.php?endpoint=get_payment_From_api&id='+id_payment
+          let url = location.origin +'/projeto_api/api/index.php?endpoint=get-payment-From-api&id='+id_payment
           fetch(url,{
             method:'GET'
           })

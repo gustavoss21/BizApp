@@ -11,7 +11,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
 
     header('Location: index.php/');
 }
-$endpoint = 'activeUser';
+$endpoint = 'active-user';
 
 $response = api_request($endpoint, 'POST', $_GET);
 // printDebug($response,true);

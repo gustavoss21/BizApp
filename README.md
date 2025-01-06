@@ -116,3 +116,20 @@ Aproveite o PSR-4 autoloading para carregar automaticamente suas classes, evitan
 
 - Testes Automatizados
 Escreva testes para suas funções (usando PHPUnit, por exemplo) para garantir que o código funcione conforme esperado.
+
+- setQueryFilterSelect agora so returna uma string com paramentros de where
+- tratamento de errors
+- prevenir de updates e deletes ser where
+- prevenir injeções de código e sanitizando a variável diretamente da superglobal $_REQUEST.
+- padronizar nomeclaturas
+- updateUser - tirar o validation parameter e definilos pos intersection
+- para adicionar um parenteses em parametros exclusivos deve usar expressao regular
+ex: 
+select * from teste where (nome ='xxx' or idade='yyy') and id <> :id
+
+- Autoloading e Namespaces
+Utilize namespaces para evitar conflitos de nomes e facilitar a organização do código.
+Aproveite o PSR-4 autoloading para carregar automaticamente suas classes, evitando require ou include manuais.
+- update user price template
+- tirar a transaction_amount do payment
+- update add last-name in user

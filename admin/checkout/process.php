@@ -14,10 +14,10 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     header('Location: index.php');
 }
 
-$endpoint = 'createPreference';
+$endpoint = 'create-preference';
 
 // $response = api_request_auth($endpoint, $user, 'GET');
-$endpoint = 'process_payment';
+$endpoint = 'process-payment';
 $json = file_get_contents('php://input');
 $data = json_decode($json, true);
 $TES = json_decode($json);

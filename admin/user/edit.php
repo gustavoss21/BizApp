@@ -11,7 +11,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     header('Location: index.php/');
 }
 
-$endpoint = 'updateUser';
+$endpoint = 'update-user';
 $link_base = '/projeto_api/admin/';
 
 $response = api_request($endpoint, 'POST', $_POST);

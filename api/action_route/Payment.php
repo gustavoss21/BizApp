@@ -181,7 +181,7 @@ class Payment
                 "entity_type" => "individual",
                 "type" => "customer",
                 "first_name"=> $payer->getParameter('nome'),
-                "last_name"=> $payer->getParameter('sobrenome'),
+                "last_name"=> 'aaaaaa',
                 "email" => $payer->getParameter('email'),
                 "identification" => [
                     "type" => $payer->getParameter('identification_type'),

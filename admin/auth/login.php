@@ -29,8 +29,8 @@ $title = 'login';
 $subtitle = 'Faça login';
 $idForm = 'loginForm';
 
-$form = new SetForm($subtitle,"action='$submit_uri' id='$idForm'",$input_error);
-$form->setElement('input',['class'=>'input-element','name'=>'name', 'id'=>'name','type'=>'text','value'=>$input_values['name'] ?? ''],'nome do usuário');
+$form = new SetForm($subtitle,"action='$submit_uri' id='$idForm' method='POST'",$input_error);
+$form->setElement('input',['class'=>'input-element','name'=>'nome', 'id'=>'name','type'=>'text','value'=>$input_values['nome'] ?? ''],'nome do usuário');
 $form->setElement('input',['class'=>'input-element','name'=>'password', 'id'=>'password','type'=>'password','value'=>$input_values['password'] ?? ''],'senha do usuário');
 $form->setElement('button',['id'=>'submit-form','class'=>'input-submit input-element','type'=>'text','type'=>"submit"],'Login');
 $form->setElement('a',['id'=>'btn-back','class'=>'element-back','type'=>'text','href'=>'../clientes'],'Voltar');

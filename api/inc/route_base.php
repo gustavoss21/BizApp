@@ -2,23 +2,47 @@
 
 namespace Api\inc;
 
-use DateTime;
+require_once 'action_route/User.php';
+require_once 'inc/Filter.php';
+require_once 'inc/Response.php';
+require_once 'action_route/Cliente.php';
+require_once 'action_route/Product.php';
+require_once 'controller/PaymentController.php';
+require_once 'controller/UserController.php';
+
+use Api\inc\Filter;
+use Api\inc\Response;
+use Api\action_route\Cliente;
+use Api\action_route\Product;
+use Exception;
+
+use Api\controller\PaymentController;
+use Api\controller\ProductController;
+
+use Api\action_route\User;
 
 if(!isset($allowedRoute)){
     die('<div style="color:red;">Rota não encontrada</div>');
 }
 
-class RouteBase{
+abstract class AbstractRoute{
     use Filter;
     use Response;
+    
 
     protected $filters;
     protected $method;
     protected $user;
-    protected $params;
-    protected $endpoint;
     protected $response_method = '';
-    protected $requiredRoutePermissions;
+    protected $routes;
+
+    abstract protected function setRoutes();
+
+    public function __construct(protected $params, protected $endpoint)
+    {
+        $this->user = new User();
+        $this->setRoutes();
+    }
 
         /**
      * define the clients parameters
@@ -56,7 +80,7 @@ class RouteBase{
 
     public function check_endpoint()
     {
-        return method_exists($this, $this->endpoint);
+        return array_key_exists($this->endpoint, $this->routes);
     }
 
     public function setUser($username = '', $password = '')
@@ -97,16 +121,11 @@ class RouteBase{
         return Response::responseSuccess([],'method is ok');
     }
 
-    protected function CheckRoutePermission($endpoint){
+    protected function CheckRoutePermission($Validationfuctions){
         $status = $this->responseSuccess([], 'User ok');
 
-        //case not have required permission
-        if(empty($this->requiredRoutePermissions[$endpoint])){
-            return $status;
-        }
-
         //call required permission
-        foreach($this->requiredRoutePermissions[$endpoint] as $permissionRequired){
+        foreach($Validationfuctions as $permissionRequired){
             $PermissionStatus = $this->$permissionRequired();
             if($PermissionStatus['error']){
                 $status = $PermissionStatus;
@@ -118,20 +137,21 @@ class RouteBase{
 
     public function route(string $endpoint)
     {
+        $controller = $this->routes[$endpoint]['controller'];
+        $method = $this->routes[$endpoint]['method'];
+        $functionsRequired = $this->routes[$endpoint]['Required'];
+
         //check access permissions
-        $userStatus = $this->CheckRoutePermission($endpoint);
+        $userStatus = $this->CheckRoutePermission($functionsRequired);
 
         if($userStatus['error']){
             return $userStatus;
         }
+
+        $classCotroller = new $controller($this->params);
         
-        return $this->$endpoint($this->params);
+        return $classCotroller->$method();
     }
 
-    public function projectionData($days){
-        $interval = "+$days days";
-        $date = new DateTime();
-        $date->modify($interval);
-        return $date->format('d/m/Y H:i:s');
-    }
+
 }

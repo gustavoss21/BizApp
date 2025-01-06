@@ -12,7 +12,7 @@ if (!isset($_GET['id'])) {
     header('Location: index.php/');
 }
 
-$endpoint = 'getUsers';
+$endpoint = 'get-users';
 $paramers = ['filter' => 'id:' . $_GET['id']];
 
 $response = api_request($endpoint, 'GET', $paramers);

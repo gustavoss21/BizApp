@@ -53,7 +53,7 @@ function api_request_auth($endpoint, array $user=[], $method = 'GET', $variables
 {
     // return [$endpoint, $method, $variables, $user, $debug ];
 
-    $credenciaisBase64 = base64_encode("{$user['name']}:{$user['password']}");
+    $credenciaisBase64 = base64_encode("{$user['nome']}:{$user['password']}");
     $url = API_BASE_URL;
 
     $headers = [
