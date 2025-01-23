@@ -39,8 +39,6 @@ fetch('http://127.0.0.1/projeto_api/api/?endpoint=create-preference&filter='+dat
   })
   .catch(err => alert('houve um erro inesperado!'));
 
-
-
 const bricksBuilder = mp.bricks();
 // custom email: test_user_1710964580@testuser.com
 // public key: APP_USR-3f2af4db-50a8-4e53-8e88-1ceb83faf56e

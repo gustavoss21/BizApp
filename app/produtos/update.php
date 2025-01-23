@@ -15,7 +15,7 @@ $params = [
     'filter' => 'id:' . $id
 ];
 
-$endpoint = 'get_products';
+$endpoint = 'get-products';
 $response = api_request_auth($endpoint, $user, 'GET', $params);
 
 $data_product = is_request_error($response);

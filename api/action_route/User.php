@@ -14,6 +14,7 @@ use Api\inc\Response;
 use Api\inc\Validation;
 use Api\inc\database;
 use Api\inc\Filter;
+use Exception;
 
 class User
 {
@@ -26,7 +27,8 @@ class User
         private string $nome = '',
         private string $sobrenome = '',
         private string $email = '',
-        private string $tokken = '',
+        private string $token = '',
+        private bool $email_is_valid = false,
         private bool $is_super_user = false,
         private string $password = '',
         private string $deleted_at = '',
@@ -90,7 +92,7 @@ class User
         $isUniqueInputs = [
             'nome' => ['param' => 'nome = :nome', 'operator' => ' or ', 'exclusive' => true],
             'email' => ['param' => 'email = :email', 'operator' => ' or ', 'exclusive' => true],
-            'tokken' => ['param' => 'tokken = :tokken', 'operator' => ' and ', 'exclusive' => true],
+            'token' => ['param' => 'token = :token', 'operator' => ' and ', 'exclusive' => true],
             'active' => ['param' => 'deleted_at is null', 'operator' => ' and ', 'exclusive' => false],
             'id' => ['param' => 'id <> :id', 'operator' => ' and ', 'exclusive' => false]
         ];
@@ -116,7 +118,8 @@ class User
         $queryBase = 'select id from authentication';
         $isUniqueInputs = [
             'is_super_user' => ['param' => 'is_super_user is true', 'operator' => ' and ', 'exclusive' => false],
-            'id' => ['param' => 'id = :id', 'operator' => ' and ', 'exclusive' => false]
+            'id' => ['param' => 'id = :id', 'operator' => ' and ', 'exclusive' => false],
+            'token' => ['param' => 'token  = :token', 'operator' => ' and ', 'exclusive' => false]
         ];
 
         $parametersToAvoidDuplication = array_intersect_key($clientParametersToValidation, $isUniqueInputs);
@@ -129,8 +132,8 @@ class User
 
     public function authenticate(bool $super_user = false)
     {
-        $parameters_value = [':tokken' => $this->tokken];
-        $query = 'select id, passwd, nome  from authentication where deleted_at is null and tokken = :tokken';
+        $parameters_value = [':token' => $this->token];
+        $query = 'select id, passwd, nome  from authentication where deleted_at is null and token = :token';
         $query .= $super_user ? ' and is_super_user is not false' : '';
 
         $conection = new database();
@@ -151,7 +154,7 @@ class User
     public function get_users()
     {
         $filters = $this->getparameters();
-        $queryBase = 'select id, nome,tokken, created_at as criado, deleted_at as removido from authentication';
+        $queryBase = 'select id, nome,token, created_at as criado, deleted_at as removido from authentication';
         $accepted_filters = [
             'id' => ['param' => 'id = :id', 'operator' => ' and ', 'exclusive' => false],
             'nome' => ['param' => 'nome = :nome', 'operator' => ' and ', 'exclusive' => false],
@@ -175,14 +178,19 @@ class User
         return $this->responseSuccess($users, 'Usuários ok');
     }
 
+    /**
+     * search by id, nome, token, email, deleted_at, active, inactive
+     *  @param array $result <p>User = $result</p>
+     * @return Response $result
+     */
     public function search_user()
     {
         $filters = $this->getparameters();
-        $queryBase = 'select id, nome,tokken, email, created_at as criado, deleted_at, identification_type, identification_number,fone_number, fone_area_code from authentication';
+        $queryBase = 'select id, nome,token, email, email_is_valid, created_at as criado, deleted_at, identification_type, identification_number,fone_number, fone_area_code from authentication';
         $accepted_filters = [
             'id' => ['param' => 'id = :id', 'operator' => ' and ', 'exclusive' => false],
             'nome' => ['param' => 'nome = :nome', 'operator' => ' and ', 'exclusive' => false],
-            'tokken' => ['param' => 'tokken = :tokken', 'operator' => ' and ', 'exclusive' => false],
+            'token' => ['param' => 'token = :token', 'operator' => ' and ', 'exclusive' => false],
             'email' => ['param' => 'email = :email', 'operator' => ' and ', 'exclusive' => false],
             'deleted_at' => ['param' => 'deleted_at = :deleted_at', 'operator' => ' and ', 'exclusive' => false],
             'active' => ['param' => 'deleted_at is null', 'operator' => ' and ', 'exclusive' => false],
@@ -216,10 +224,10 @@ class User
 
     public function create_user()
     {
-        $inputsRequired = ['nome' => ['min_4'], 'tokken' => ['min_32'], 'password' => ['min_32'], 'email' => ['email'], 'fone_area_code' => [], 'fone_number' => [], 'identification_type' => [], 'identification_number' => []];
+        $inputsRequired = ['nome' => ['min_4'], 'token' => ['min_32'], 'password' => ['min_32'], 'email' => ['email'], 'fone_area_code' => [], 'fone_number' => [], 'identification_type' => [], 'identification_number' => []];
         $query = 'insert into authentication 
-                (nome, email, fone_area_code, fone_number, identification_type, identification_number, tokken, passwd, created_at, updated_at)
-                values(:nome, :email,:fone_area_code,:fone_number,:identification_type,:identification_number, :tokken, :password, now(), now())';
+                (nome, email, fone_area_code, fone_number, identification_type, identification_number, token, passwd, created_at, updated_at)
+                values(:nome, :email,:fone_area_code,:fone_number,:identification_type,:identification_number, :token, :password, now(), now())';
 
         //checks that the parameters are set
         $params_data = self::issetParamasValidation($inputsRequired, $this->getparameters());
@@ -243,9 +251,9 @@ class User
         $inputsRequired = ['id' => ['int'], 'nome' => ['min_4']];
         $query = 'update authentication set nome = :nome where id = :id';
 
-        if (isset($this->params['tokken'])) {
-            $inputsRequired = ['id' => ['int'], 'nome' => ['min_4'], 'tokken' => ['min_32'], 'password' => ['min_32']];
-            $query = 'update authentication set nome = :nome, tokken = :tokken, passwd = :password where id = :id';
+        if (isset($this->params['token'])) {
+            $inputsRequired = ['id' => ['int'], 'nome' => ['min_4'], 'token' => ['min_32'], 'password' => ['min_32']];
+            $query = 'update authentication set nome = :nome, token = :token, passwd = :password where id = :id';
         }
 
         //checks that the parameters are set
@@ -261,6 +269,60 @@ class User
         $result = $connection->EXE_NON_QUERY($query, $paramsToQuery);
 
         return $this->responseSuccess($result, 'update success');
+    }
+
+    /**
+     * @return Response
+     */
+    public function reset_user_password()
+    {
+        $inputsRequired = ['token' => ['min_32'],'password'=>['not_null']];
+        $query = 'update authentication set passwd = :password where token = :token';
+
+        //checks that the parameters are set
+        $params_data = self::issetParamasValidation($inputsRequired, $this->getparameters());
+
+        if (!$params_data['valid']) {
+            return $this->responseError('existem parâmetros inválidos', $params_data['erros']);
+        }
+
+        //encrypt password
+        $params_data['data']['password'] = password_hash($params_data['data']['password'], PASSWORD_DEFAULT);
+
+        $paramsToQuery = $this->setQueryParams($params_data['data']);
+
+        $connection = new database();
+        $result = $connection->EXE_NON_QUERY($query, $paramsToQuery);
+
+        return $this->responseSuccess($result, 'update success');
+    }
+
+    /**
+     * save email_is_valid to database
+     * @return Response
+     */
+    public function email_validation()
+    {
+        $inputsRequired = ['token' => ['min_32']];
+        $query = 'update authentication set email_is_valid = true where token = :token';
+        //checks that the parameters are set
+        $params_data = self::issetParamasValidation($inputsRequired, $this->getParameters());
+
+        if (!$params_data['valid']) {
+            return $this->responseError('existem parâmetros inválidos', $params_data['erros']);
+        }
+
+        $paramsToQuery = $this->setQueryParams($params_data['data']);
+
+        $connection = new database();
+        $result = $connection->EXE_NON_QUERY($query, $paramsToQuery);
+
+        if(!$result){
+            return $this->responseError('email invalid');
+        }
+
+        return $this->responseSuccess($result, 'email validated');
+
     }
 
     public function activeUser()

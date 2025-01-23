@@ -33,7 +33,7 @@ $submit_uri = 'status.php';
 $form = new SetForm($subtitle,"action='$submit_uri' id='$idForm'",$input_error);
 
 $form->setElement('input',['class'=>'input-element','name'=>'nome', 'id'=>'nome','type'=>'text','value'=>$input_values['name'] ?? ''],'nome do usuário');
-$form->setElement('input',['class'=>'input-element','name'=>'tokken', 'id'=>'tokken','type'=>'text','value'=>$input_values['tokken'] ?? ''],'Usuario | token');
+// $form->setElement('input',['class'=>'input-element','name'=>'token', 'id'=>'token','type'=>'text','value'=>$input_values['token'] ?? ''],'Usuario | token');
 $form->setElement('input',['class'=>'input-element','name'=>'email', 'id'=>'email','type'=>'email','value'=>$input_values['email'] ?? ''],'email do usuário');
 $form->setElement('button',['id'=>'submit-form','class'=>'input-submit input-element','type'=>'text','type'=>"submit",'value'=>$input_values['name'] ?? ''],'Pesquisar');
 $form->setElement('p',['id'=>'rule-form'],'preencha pelo menos 1 dos campos');
@@ -51,7 +51,13 @@ foreach ($_GET as $filter => $value) {
         continue;
     }
 
-    $filter_array[] = $filter . ':' . $value;
+    $token_sanitize = filter_input(INPUT_GET, $filter, FILTER_SANITIZE_ENCODED);
+    $token_decode = urldecode($token_sanitize);
+    $velue_security = urlencode($token_decode);
+
+
+
+    $filter_array[] = $filter . ':' . $velue_security;
 }
 
 $filters['filter'] = implode(';', $filter_array);

@@ -133,3 +133,14 @@ Aproveite o PSR-4 autoloading para carregar automaticamente suas classes, evitan
 - update user price template
 - tirar a transaction_amount do payment
 - update add last-name in user
+- message de fomularios chagando?
+- envio de email em segundo plano
+- envio de parametros especificos para o update_user
+- direcionar todas as rotas para o mesmo arquivo.
+- direcionar os assets para os arquivos necessarios
+- animação ao reenviar email na pagina de status.php
+- status de erro atrasado pagina de status
+- adicionar update email na pagina status.php
+- tempo de validade par o token ?
+- email com caracteres criptografados
+- enviar o boleto para o email

@@ -170,6 +170,30 @@ class ApiRoute extends AbstractRoute
                    'superAuthorizationRequired',
                     'postRequiredMethod'
                 ],   
+            ],
+            'reset-password' => [
+                'controller'=>'Api\Controller\UserController',
+                'method'=>'reset_password',
+                'Required'=>[
+                    // 'superAuthorizationRequired',
+                    'postRequiredMethod'
+                ],
+               
+            ],
+            'email-validation' => [
+                'controller'=>'Api\Controller\mailController',
+                'method'=>'email_validation',
+                'Required'=>[
+                    'getRequiredMethod'
+                ],   
+            ]
+            ,
+            'resend-validation-email' => [
+                'controller'=>'Api\Controller\mailController',
+                'method'=>'send_email_validation',
+                'Required'=>[
+                    'getRequiredMethod'
+                ],   
             ]
         ];
     }

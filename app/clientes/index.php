@@ -1,4 +1,5 @@
 <?php
+
 $allowedRoute = true;
 
 require_once '../inc/config.php';
@@ -7,10 +8,10 @@ require_once '../inc/api_functions.php';
 session_start();
 
 $message = [];
-$endpoint = 'get_clients';
+$endpoint = 'get-clients';
 
 $paramenters = ['filter' => implode(';', ['active:true', ...$_GET])];
-$request = api_request_auth($endpoint,$user ,'GET', $paramenters,);
+$request = api_request_auth($endpoint, $user, 'GET', $paramenters, );
 
 $data = is_request_error($request);
 

@@ -72,8 +72,8 @@
 
                 document . getElementsByTagName('body')[0] . innerHTML = body;
                 // if(response.status === 'success'){
-                //     let token = formData.get('tokken')
-                //     location.href = '/projeto_api/admin/user/status.php?tokken='+token
+                //     let token = formData.get('token')
+                //     location.href = '/projeto_api/admin/user/status.php?token='+token
                 //     return
                 // }
             }

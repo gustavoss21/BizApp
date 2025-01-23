@@ -6,7 +6,7 @@ require_once '../inc/api_functions.php';
 
 session_start();
 
-$endpoint = 'get_clients';
+$endpoint = 'get-clients';
 
 if (!isset($_GET['id'])) {
     header('Location: index.php/');

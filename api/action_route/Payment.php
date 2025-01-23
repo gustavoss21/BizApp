@@ -90,6 +90,10 @@ class Payment
         if (!isset($this->{$parameter})) {
             return;
         }
+        if(is_null($value)){
+            $this->$parameter = $value;
+            return;
+        }
 
         $this->$parameter = trim($value);
     }
@@ -216,7 +220,7 @@ class Payment
             'items' => [
                 [
                     'id' => $user->getParameter('id'),
-                    'title' => $user->getParameter('tokken'),
+                    'title' => $user->getParameter('token'),
                     'description' => 'usuario da api',
                     'picture_url' => 'https://www.myapp.com/myimage.jpg',
                     'category_id' => 'user_api',
@@ -227,7 +231,7 @@ class Payment
             ],
             'marketplace_fee' => 0,
             'payer' => [
-                'name' => $user->getParameter('tokken'),
+                'name' => $user->getParameter('token'),
                 'username' => 'User',
                 'email' => $user->getParameter('email'),
                 'phone' => [
@@ -387,7 +391,7 @@ class Payment
         $id_customer = $this->getParameter('id_customer');
 
         if(empty($id_customer)){
-            return self::responseError('id_customer not founded');
+            return $this->responseError('id_customer not founded');
         }
 
         $query .= ' where id_customer = :id_customer';

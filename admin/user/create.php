@@ -27,7 +27,7 @@ $form = new SetForm($subtitle,"action='$submit_uri' id='$idForm'",$input_error);
 $form->setElement('input',['class'=>'input-element','name'=>'nome', 'id'=>'nome','type'=>'text','value'=>$input_values['name'] ?? ''],'nome');
 $form->setElement('input',['class'=>'input-element','name'=>'email', 'id'=>'email','type'=>'email','value'=>$input_values['email'] ?? ''],'email');
 $form->setElement('input',['class'=>'input-element','name'=>'fone_number', 'id'=>'fone_number','type'=>'text','value'=>$input_values['fone_number'] ?? ''],'DDD + telefone');
-$form->setElement('input',['class'=>'input-element','name'=>'tokken', 'id'=>'tokken','type'=>'text','value'=>$input_values['tokken'] ?? ''],'tokken',['readonly']);
+$form->setElement('input',['class'=>'input-element','name'=>'token', 'id'=>'token','type'=>'text','value'=>$input_values['token'] ?? ''],'token',['readonly']);
 $form->setElement('input',['class'=>'input-element','name'=>'password', 'id'=>'password','type'=>'password','value'=>$input_values['password'] ?? ''],'password',['readonly']);
 
 $identificationType = $form->buildElement('input',['class'=>'identification_type radio','name'=>'identification_type', 'type'=>'radio','value'=>'CPF'],'CPF',['checked']);
@@ -38,5 +38,5 @@ $form->setElement('button',['id'=>'submit-form','class' => 'input-submit input-e
 $form->setElement('a',['id'=>'btn-back','class'=>'element-back','type'=>'text','href'=>'../'],'Voltar');
 
 $body = $form->buildForm();
-
+print_r($message);
 require '../layout.php';

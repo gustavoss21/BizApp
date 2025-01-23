@@ -11,7 +11,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
     header('Location: index.php/');
 }
-$endpoint = 'destroy_client';
+$endpoint = 'destroy-client';
 
 $response = api_request_auth($endpoint, $user, 'POST', $_POST);
 

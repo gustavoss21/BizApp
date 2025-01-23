@@ -39,7 +39,7 @@ class clientController extends Controller{
         $ClientExist = $cliente->check_client_exists();
 
         if ($ClientExist) {
-            return Response::responseError('email or name is already registered');
+            return $this->responseError('email or name is already registered');
         };
 
         //create client
@@ -56,7 +56,7 @@ class clientController extends Controller{
         $ClientExist = $cliente->check_client_exists();
 
         if ($ClientExist) {
-            return Response::responseError('email or name is already registered');
+            return $this->responseError('email or name is already registered');
         };
 
         //update client
@@ -73,7 +73,7 @@ class clientController extends Controller{
         $ClientExist = $cliente->check_client_exists();
 
         if (!$ClientExist) {
-            return Response::responseError('client not fund, try again later');
+            return $this->responseError('client not fund, try again later');
         };
 
         //destroy client

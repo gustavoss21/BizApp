@@ -96,12 +96,14 @@ form.addEventListener('submit',event=>{
         response=>{
 
             if(response.status === 'success'){
-                let token = formData.get('tokken')
-                location.href = '/projeto_api/admin/user/status.php?tokken='+token
+                let data = response.data[0];
+                let token = data.token;
+                location.href = '/projeto_api/admin/user/status.php?token='+token;
                 return
             }
             let message = document.querySelector('#message')
 
+            //error input aqui
             message.innerHTML = response['message']['msg']
             message.style.color = response['message']['color']
             message.style.marginTop = '15px'
@@ -155,7 +157,7 @@ function generateToken(length = 32) {
 
 function setToken(){
     let elementPassword = document.querySelector('#password');
-let elementToken = document.querySelector('#tokken');
+let elementToken = document.querySelector('#token');
     elementPassword.value = generateToken();
     elementToken.value = generateToken();
 }

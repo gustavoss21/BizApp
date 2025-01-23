@@ -9,6 +9,7 @@ require_once 'action_route/Cliente.php';
 require_once 'action_route/Product.php';
 require_once 'controller/PaymentController.php';
 require_once 'controller/UserController.php';
+require_once 'controller/MailController.php';
 
 use Api\inc\Filter;
 use Api\inc\Response;
@@ -66,11 +67,11 @@ abstract class AbstractRoute{
         }
 
         if(array_intersect_key($parametersDenied,$this->params)){
-            return self::responseError('request unauthorized');
+            return $this->responseError('request unauthorized');
 
         }
 
-        return self::responseSuccess([], 'request authorizated');
+        return $this->responseSuccess([], 'request authorizated');
 
     }
 
@@ -85,7 +86,7 @@ abstract class AbstractRoute{
 
     public function setUser($username = '', $password = '')
     {
-        $user = ['tokken' => $username, 'password' => $password];
+        $user = ['token' => $username, 'password' => $password];
         $this->setClassParameters($this->user, $user);
     }
 
@@ -107,18 +108,18 @@ abstract class AbstractRoute{
 
     public function getRequiredMethod(){
         if($this->method != 'GET'){
-            return Response::responseError('method is not permitted');
+            return $this->responseError('method is not permitted');
 
         }
-        return Response::responseSuccess([],'method is ok');
+        return $this->responseSuccess([],'method is ok');
     }
 
     public function postRequiredMethod(){
         if($this->method != 'POST'){
-            return Response::responseError('method is not permitted');
+            return $this->responseError('method is not permitted');
 
         }
-        return Response::responseSuccess([],'method is ok');
+        return $this->responseSuccess([],'method is ok');
     }
 
     protected function CheckRoutePermission($Validationfuctions){

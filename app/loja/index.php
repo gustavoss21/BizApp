@@ -7,7 +7,7 @@ require_once '../inc/api_functions.php';
 
 session_start();
 
-$endpoint = 'createPreference';
+$endpoint = 'create-preference';
 $paramenters = [
     'filter' => 'active:true',
     ...$_GET

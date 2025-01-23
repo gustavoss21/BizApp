@@ -5,6 +5,7 @@ namespace Api\controller;
 require_once 'action_route/Payment.php';
 require_once 'action_route/Price.php';
 require_once 'action_route/User.php';
+require_once 'action_route/Mail.php';
 require_once 'inc/Response.php';
 require_once 'inc/Filter.php';
 require_once 'controller.php';
@@ -12,6 +13,7 @@ require_once 'controller.php';
 use Api\action_route\Payment;
 use Api\action_route\Price;
 use Api\action_route\User;
+use Api\action_route\Email;
 use Api\inc\Response;
 use Api\inc\Filter;
 use Api\controller\Controller;
@@ -121,6 +123,12 @@ class PaymentController extends Controller{
 
         if (!in_array($statusPayment, ['approved', 'pending'])) {
             return $this->responseError('pagamento não realizado, status: ' . $statusPayment);
+        }
+        if($statusPayment === 'approved'){
+            
+            $mail = new Email($user->getParameter('email'),$user->getParameter('nome'));
+            $mail->setMail('redefina sua senha', Email::RESET_PASSWORD,$user->getParameter('token'));
+            $result_email = $mail->send();
         }
 
         $Payment->setParameter('token', '');

@@ -6,7 +6,7 @@ require_once '../inc/api_functions.php';
 
 session_start();
 
-$endpoint = 'get_products';
+$endpoint = 'get-products';
 $paramenters = [
     'filter' => 'active:true',
     ...$_GET

@@ -84,4 +84,22 @@ trait Validation
             return false;
         }
     }
+
+    public function validation_password($password, $password2){
+        $status = ['error'=>false,'message'=>''];
+        
+        //check if you have both passwords
+        if(!$password || !$password2){
+            $status['error'] = true;
+            $status['message'] = 'password and confirm password are required';  
+        }
+
+        //check if you have different passwords
+        if(!($password === $password2)){
+            $status['error'] = true;
+            $status['message'] = 'different passwords';    
+        }
+
+        return $status;
+    }
 }

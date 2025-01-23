@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="Content-Language" content="pt-br">
-    <title>tokken</title>
+    <title>token</title>
     <link rel="stylesheet" href="/projeto_api/app/assets/css/style.css">
     <link rel="stylesheet" href="/projeto_api/app/assets/css/style_cliente.css">
     <link rel="stylesheet" href="/projeto_api/app/assets/css/style_form.css">

@@ -16,7 +16,7 @@ $params = [
     'filter' => 'id:' . $id
 ];
 
-$endpoint = 'get_clients';
+$endpoint = 'get-clients';
 $response = api_request_auth($endpoint, $user, 'GET', $params);
 
 $data_client = is_request_error($response);

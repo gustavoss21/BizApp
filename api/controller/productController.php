@@ -46,7 +46,7 @@ class ProductController extends Controller{
         $ProductExist = $product->checkProductExists();
 
         if ($ProductExist) {
-            return Response::responseError('the product is already registered');
+            return $this->responseError('the product is already registered');
         };
 
         //create Product
@@ -63,7 +63,7 @@ class ProductController extends Controller{
         $ProductExist = $product->checkProductExists();
 
         if ($ProductExist) {
-            return Response::responseError('the product is already registered');
+            return $this->responseError('the product is already registered');
         };
 
         //update product
